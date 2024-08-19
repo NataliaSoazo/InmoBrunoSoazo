@@ -1,0 +1,62 @@
+@model IEnumerable<Propietario>
+
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h4> Lista de Propietarios</h4>
+
+<p>
+    <a asp-action="Editar"method = "post">CREAR NUEVO PROPIETARIO</a>
+</p>
+<table class="table" id="table">
+    <thead> 
+        <tr>
+            <th >
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Apellido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Telefono)
+            </th>
+             <th>
+               ACCIONES
+            </th>
+        </tr>
+    </thead>
+    <tbody id="table">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Apellido)
+                </td>
+              
+                <td>
+                    @Html.DisplayFor(modelItem => item.Telefono)
+                </td>
+                
+               
+                <td>
+                    <a asp-action="Detalles" asp-route-id=@item.Id><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
+                    <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil " style="font-size:25px;" id="edi"></i></a>
+                    <a asp-action="Eliminar" asp-route-id=@item.Id><i class="fa fa-trash " style="font-size:25px;"id="eli"></i></a>
+                  
+                  
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

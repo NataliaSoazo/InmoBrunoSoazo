@@ -138,7 +138,7 @@ public class RepositorioPropietario
         return 0;
     }
 
-    public int  EliminarPersona(int id){
+    public int  EliminarPropietario(int id){
         using(var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"DELETE from propietarios WHERE {nameof(Propietario.Id)} = @{nameof(Propietario.Id)}";
@@ -152,5 +152,7 @@ public class RepositorioPropietario
         }
          return 0;
     }
+
+
 
 }

@@ -22,7 +22,7 @@ public class Propietario
     [Display(Name = "CIUDAD")]
     public string? Ciudad { get; set; }
     public string? RequestId { get; set; }
-    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+   // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
     
 }

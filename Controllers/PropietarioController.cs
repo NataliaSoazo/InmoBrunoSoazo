@@ -35,7 +35,13 @@ public class PropietarioController : Controller
     
     public IActionResult Guardar( Propietario propietario)
     {  
+        propietario.Nombre = propietario.Nombre.ToUpper();
+        propietario.Apellido = propietario.Apellido.ToUpper();
+        propietario.Email = propietario.Email.ToUpper();
+        propietario.Domicilio = propietario.Domicilio.ToUpper();
+        propietario.Ciudad = propietario.Ciudad.ToUpper();
         RepositorioPropietario rp = new RepositorioPropietario();
+        
         if(propietario.Id > 0){
             rp.ModificarPropietario(propietario);
 
@@ -43,10 +49,11 @@ public class PropietarioController : Controller
         rp.AltaPropietario(propietario);
         return RedirectToAction(nameof(Index));
     }
+    
      public IActionResult Eliminar( int id)
     {  
         RepositorioPropietario rp = new RepositorioPropietario();
-        rp.EliminarPersona(id);
+        rp.EliminarPropietario(id);
         return RedirectToAction(nameof(Index));
     }    
     public IActionResult Detalles( int id)

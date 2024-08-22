@@ -163,7 +163,7 @@ public class RepositorioPropietario
 
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"SELECT {nameof(Propietario.Id)},{nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)} 
+            var sql = @$"SELECT {nameof(Propietario.Id)},{nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)} FROM propietarios
                       WHERE {nameof(Propietario.Nombre)} LIKE @{nameof(Propietario.Nombre)} OR {nameof(Propietario.Apellido)} LIKE @{nameof(Propietario.Nombre)}";
 
             using (var command = new MySqlCommand(sql, connection))

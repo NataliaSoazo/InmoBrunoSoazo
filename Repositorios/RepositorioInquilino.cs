@@ -36,29 +36,32 @@ public class RepositorioInquilino
                         {
                             Id = reader.GetInt32(nameof(Inquilino.Id)),
                             Nombre = reader.GetString(nameof(Inquilino.Nombre)),
-                            Apellido = reader.GetString (nameof(Inquilino.Apellido)),
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido)),
                             Dni = reader.GetString(nameof(Inquilino.Dni)),
-                            Email = reader.GetString (nameof(Inquilino.Email)),
+                            Email = reader.GetString(nameof(Inquilino.Email)),
                             Telefono = reader.GetString(nameof(Inquilino.Telefono)),
                             Domicilio = reader.GetString(nameof(Inquilino.Domicilio)),
                             Ciudad = reader.GetString(nameof(Inquilino.Ciudad)),
 
                         });
-                     }
+                    }
 
                 }
             }
-         }
-         return inquilinos;
+        }
+        return inquilinos;
     }
 
-    public int AltaInquilino(Inquilino inquilino){
+    public int AltaInquilino(Inquilino inquilino)
+    {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString)){
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
             var sql = @$"INSERT INTO inquilinos ({nameof(Inquilino.Nombre)},{nameof(Inquilino.Apellido)},{nameof(Inquilino.Dni)},{nameof(Inquilino.Email)},{nameof(Inquilino.Telefono)},{nameof(Inquilino.Domicilio)},{nameof(Inquilino.Ciudad)})
                                             VALUES (@{nameof(Inquilino.Nombre)},@{nameof(Inquilino.Apellido)},@{nameof(Inquilino.Dni)},@{nameof(Inquilino.Email)},@{nameof(Inquilino.Telefono)},@{nameof(Inquilino.Domicilio)},@{nameof(Inquilino.Ciudad)});            
              SELECT LAST_INSERT_ID();";
-            using (var command = new MySqlCommand(sql, connection)){
+            using (var command = new MySqlCommand(sql, connection))
+            {
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Nombre)}", inquilino.Nombre);
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Apellido)}", inquilino.Apellido);
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Dni)}", inquilino.Dni);
@@ -71,7 +74,6 @@ public class RepositorioInquilino
                 id = Convert.ToInt32(command.ExecuteScalar());
                 inquilino.Id = id;
                 connection.Close();
-
 
             }
         }
@@ -107,13 +109,15 @@ public class RepositorioInquilino
                     }
                 }
             }
-            
+
         }
         return inquilino;
     }
 
-    public int ModificarInquilino(Inquilino inquilino){
-        using (var connection = new MySqlConnection(ConnectionString)){
+    public int ModificarInquilino(Inquilino inquilino)
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
             var sql = @$"UPDATE Inquilinos 
             SET {nameof(Inquilino.Nombre)} = @{nameof(Inquilino.Nombre)},
             {nameof(Inquilino.Apellido)} = @{nameof(Inquilino.Apellido)},
@@ -122,8 +126,9 @@ public class RepositorioInquilino
             {nameof(Inquilino.Telefono)} = @{nameof(Inquilino.Telefono)},
             {nameof(Inquilino.Domicilio)} = @{nameof(Inquilino.Domicilio)},
             {nameof(Inquilino.Ciudad)} = @{nameof(Inquilino.Ciudad)}
-            WHERE {nameof(Inquilino.Id)} = @{nameof(inquilino.Id)} ";     
-            using (var command = new MySqlCommand(sql, connection)){
+            WHERE {nameof(Inquilino.Id)} = @{nameof(inquilino.Id)} ";
+            using (var command = new MySqlCommand(sql, connection))
+            {
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Id)}", inquilino.Id);
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Nombre)}", inquilino.Nombre);
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Apellido)}", inquilino.Apellido);
@@ -141,19 +146,20 @@ public class RepositorioInquilino
         return 0;
     }
 
-    public int  EliminarInquilino(int id){
-        using(var connection = new MySqlConnection(ConnectionString))
+    public int EliminarInquilino(int id)
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"DELETE from Inquilinos WHERE {nameof(Inquilino.Id)} = @{nameof(Inquilino.Id)}";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Inquilino.Id)}", id);
                 connection.Open();
-               command.ExecuteNonQuery();
-               connection.Close();
+                command.ExecuteNonQuery();
+                connection.Close();
             }
         }
-         return 0;
+        return 0;
     }
 
     public IList<Inquilino> BuscarPorNombre(string nombre)
@@ -164,30 +170,30 @@ public class RepositorioInquilino
         using (var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)},{nameof(Inquilino.Nombre)},{nameof(Inquilino.Apellido)},{nameof(Inquilino.Dni)},{nameof(Inquilino.Email)},{nameof(Inquilino.Telefono)},{nameof(Inquilino.Domicilio)},{nameof(Inquilino.Ciudad)} 
-                      WHERE {nameof(Inquilino.Nombre)} LIKE @{nameof(Inquilino.Nombre)} OR {nameof(Inquilino.Apellido)} LIKE @{nameof(Inquilino.Nombre)}";
+                      FROM inquilinos WHERE {nameof(Inquilino.Nombre)} LIKE @{nameof(Inquilino.Nombre)} OR {nameof(Inquilino.Apellido)} LIKE @{nameof(Inquilino.Nombre)}";
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.Add(new MySqlParameter(nameof(nombre), MySqlDbType.VarChar) { Value = nombre });
+                command.Parameters.AddWithValue("@nombre", nombre);
                 command.CommandType = CommandType.Text;
                 connection.Open();
 
-                using (var reader = command.ExecuteReader())
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    var p = new Inquilino
                     {
-                        var p = new Inquilino
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal(nameof(Inquilino.Id))),
-                            Nombre = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Nombre))),
-                            Apellido = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Apellido))),
-                            Dni = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Dni))),
-                            Telefono = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Telefono))),
-                            Email = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Email))),
-                           
-                        };
-                        res.Add(p);
-                    }
+                        Id = reader.GetInt32(reader.GetOrdinal(nameof(Inquilino.Id))),
+                        Nombre = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Nombre))),
+                        Apellido = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Apellido))),
+                        Dni = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Dni))),
+                        Telefono = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Telefono))),
+                        Email = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Email))),
+
+                    };
+                    res.Add(p);
+
                 }
             }
         }

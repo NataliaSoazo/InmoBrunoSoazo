@@ -1,14 +1,14 @@
-@model IEnumerable<Propietario>
+@model IEnumerable<Inquilino>
 
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h4> Listado  de Propietarios</h4>
+<h4> Listado  de Inquilinos</h4>
 
 <p>
-    <a asp-action="Editar"method = "post">CREAR NUEVO PROPIETARIO</a>
+    <a asp-action="Editar"method = "post">CREAR NUEVO INQUILINO</a>
 </p>
 <form asp-action="Index">
     <p>
@@ -67,7 +67,7 @@
     </tbody>
 </table>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_propietario">
+<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Inquilino">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -77,8 +77,8 @@
         </button>
       </div>
       <div class="modal-body">
-        <input type="hidden" name="Id" value="" id ="propietario_eliminar_id">
-        <p><span id="propietario_eliminar_nombre"></span></p>
+        <input type="hidden" name="Id" value="" id ="Inquilino_eliminar_id">
+        <p><span id="Inquilino_eliminar_nombre"></span></p>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-danger" >Eliminar</button>
@@ -90,9 +90,9 @@
 @section Scripts{
     <script>
         function eliminar(id, nombre){
-            document.querySelector("#propietario_eliminar_id").value = id;
-            document.querySelector("#propietario_eliminar_nombre").innerHTML = nombre;
-            $("#modal_eliminar_propietario").modal("show");
+            document.querySelector("#Inquilino_eliminar_id").value = id;
+            document.querySelector("#Inquilino_eliminar_nombre").innerHTML = nombre;
+            $("#modal_eliminar_Inquilino").modal("show");
         }
     </script>
 }

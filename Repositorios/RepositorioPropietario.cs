@@ -21,7 +21,10 @@ public class RepositorioPropietario
         var propietarios = new List<Propietario>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Dni)}, {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)},  {nameof(Propietario.Email)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Domicilio)}, {nameof(Propietario.Ciudad)} FROM propietarios";
+            var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Dni)}, 
+            {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)},  {nameof(Propietario.Email)}, 
+            {nameof(Propietario.Telefono)}, {nameof(Propietario.Domicilio)}, {nameof(Propietario.Ciudad)}
+            FROM propietarios ORDER BY apellido LIMIT 10 OFFSET 0 ;";
             using (var command = new MySqlCommand(sql, connection))
             {
                 connection.Open();
@@ -153,6 +156,46 @@ public class RepositorioPropietario
          return 0;
     }
 
+    public IList<Propietario> BuscarPorNombre(string nombre)
+    {
+        var res = new List<Propietario>();
+        nombre = "%" + nombre + "%";
 
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT {nameof(Propietario.Id)},{nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)} 
+                      WHERE {nameof(Propietario.Nombre)} LIKE @{nameof(Propietario.Nombre)} OR {nameof(Propietario.Apellido)} LIKE @{nameof(Propietario.Nombre)}";
 
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.Add(new MySqlParameter(nameof(nombre), MySqlDbType.VarChar) { Value = nombre });
+                command.CommandType = CommandType.Text;
+                connection.Open();
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var p = new Propietario
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal(nameof(Propietario.Id))),
+                            Nombre = reader.GetString(reader.GetOrdinal(nameof(Propietario.Nombre))),
+                            Apellido = reader.GetString(reader.GetOrdinal(nameof(Propietario.Apellido))),
+                            Dni = reader.GetString(reader.GetOrdinal(nameof(Propietario.Dni))),
+                            Telefono = reader.GetString(reader.GetOrdinal(nameof(Propietario.Telefono))),
+                            Email = reader.GetString(reader.GetOrdinal(nameof(Propietario.Email))),
+                           
+                        };
+                        res.Add(p);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
 }
+
+
+
+

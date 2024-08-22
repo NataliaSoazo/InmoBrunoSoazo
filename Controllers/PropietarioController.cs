@@ -11,17 +11,19 @@ public class PropietarioController : Controller
 {
     private readonly ILogger<HomeController> _logger;
 
+
     public PropietarioController(ILogger<HomeController> logger)
     {
+    
         _logger = logger;
     }
 
-    public IActionResult Index()
-    {
-        RepositorioPropietario rp = new RepositorioPropietario();
-        var lista = rp.GetPropietarios();
+    public IActionResult Index (){
+         RepositorioPropietario rp = new RepositorioPropietario();
+         var lista = rp.GetPropietarios();
         return View(lista);
     }
+    
     public IActionResult Editar(int id)
     {
         if (id > 0){
@@ -62,4 +64,30 @@ public class PropietarioController : Controller
             var propietario = rp.getPropietario(id);
             return View(propietario); 
     }    
+
+// GET: Propietario/Busqueda
+    public IActionResult Busqueda()
+    {
+        try
+        {
+            return View();
+        }
+        catch (Exception ex)
+        {//poner breakpoints para detectar errores
+            throw;
+        }
+    }
+      //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
+    public IActionResult Buscar(string q)
+    {
+        try
+        {   RepositorioPropietario rp = new RepositorioPropietario();
+            var res = rp.BuscarPorNombre(q);
+            return Json(new { Datos = res });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { Error = ex.Message });
+        }
+    }
 }

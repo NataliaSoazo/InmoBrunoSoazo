@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-08-2024 a las 14:34:03
+-- Tiempo de generación: 22-08-2024 a las 03:09:50
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.1.25
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `inmosoazo2024`
+-- Base de datos: `proyecto-bruno-soazo`
 --
 
 -- --------------------------------------------------------
@@ -58,9 +58,7 @@ CREATE TABLE `inmuebles` (
 
 INSERT INTO `inmuebles` (`Id`, `Direccion`, `Ambientes`, `Uso`, `Valor`, `Disponible`, `Propietarioid`) VALUES
 (1, 'JUNIN 890', 3, 'DPTO', 120000, 'SI', 1),
-(2, 'SUCRE', 4, 'CASA', 150000, 'SI', 4),
-(3, 'IRIGOYEN 459', 4, 'COMERCIO', 1200000, 'SI', 3),
-(4, 'Av Lafinur 1200', 4, 'DPTO', 1200000, 'SI', 5);
+(2, 'SUCRE', 4, 'CASA', 150000, 'SI', 4);
 
 -- --------------------------------------------------------
 
@@ -85,8 +83,9 @@ CREATE TABLE `inquilinos` (
 
 INSERT INTO `inquilinos` (`Id`, `Nombre`, `Apellido`, `Dni`, `Email`, `Telefono`, `Domicilio`, `Ciudad`) VALUES
 (1, 'MARCOS', 'ARAGON', '28898345', 'maragon@gmail.com', '2664567890', 'Los Sauces 28', 'S'),
-(2, 'PRUDENCIO', 'LOPEZ', '123456654', 'lpro@gmail.com', '266345432', 'Las Heras', 'Mendoza'),
-(3, 'MARTA', 'MOYANO', '17876543', 'mmoyano@gmail.com', '351678967', 'Aguaribay 77', 'Córdoba');
+(2, 'RAFAEL', 'LOPEZ', '123456654', 'LPRO@GMAIL.COM', '2663454325', 'LAS HERAS', 'MENDOZA'),
+(3, 'MARTA', 'MOYANO', '17876543', 'MMOYANO@GMAIL.COM', '3516789677', 'AGUARIBAY 77', 'CÓRDOBA'),
+(4, 'PRUDENCIO', 'RODRIGUEZ', '18223221', 'RPRUDENCIO@GMAIL.COM', '2664537777', 'TACUARI 80', 'SAN LUIS');
 
 -- --------------------------------------------------------
 
@@ -126,10 +125,19 @@ CREATE TABLE `propietarios` (
 --
 
 INSERT INTO `propietarios` (`Id`, `Nombre`, `Apellido`, `Dni`, `Email`, `Telefono`, `Domicilio`, `Ciudad`) VALUES
-(1, 'NATALIA', 'SOAZO', '31542891', 'natalia.s.laboral@gmail.com', '2664344567', '900', 'La Punta'),
+(1, 'NATALIA', 'SOAZO', '31542891', 'NATALIA.S.LABORAL@GMAIL.COM', '2664344567', 'FLORIDA 50', 'LA PUNTA'),
 (3, 'ANAHI', 'CESPEDES', '24567765', 'ncespedes@gmail.com', '2664547689', 'Centenario 879', 'Sa'),
 (4, 'JOSE ANTONIO', 'GAUNA', '98654345', 'jantonio@gmail,com', '2345678465', 'B° Lucas Rodriguez', 'san '),
-(5, 'LUCIO', 'PEREZ', '23456765', 'lperez@gmail.com', '2665434570', 'LOS CIPRESES 345', 'SAN LUIS');
+(7, 'CELESTE', 'AUMADA', '49288549', 'CAUMADA@GMAIL.COM', '1324365432', 'SAN MARTIN 80', 'SAN LUIS'),
+(8, 'LORENZO', 'BENITEZ', '46876377', 'BLORENZ@GMAIL.COM', '2664536884', 'MITRE 223', 'SAN LUIS'),
+(9, 'ALBERTO', 'SOSA', '44444444', 'GHDHHG@GMAIL.COM', '265435366', 'SANTA FE 877', 'SAN LUIS'),
+(10, 'ALBERTO', 'GONZALES', '1234543216', 'RPRUDENCIO@GMAIL.COM', '2664329752', 'SARMIENTO 973', 'SAN LUIS'),
+(11, 'ANTONIO', 'CALDERÓN', '2563576536', 'ANTO@IMAIL', '5482314985', 'BELGRANO', 'SAN LUIS'),
+(12, 'ALEJO', 'PEREZ', '2346519835', 'ALEJO@MAIL', '2664329754', 'SERRANA 76', 'SAN LUIS'),
+(13, 'LISANDRO', 'ALGUILERA', '4563789210', 'LI@MAIL', '2664873452', 'SAN MARTÍN', 'SAN LUIS'),
+(14, 'ABEL', 'CASTILLO', '1234554321', 'ABELITO@MAIL', '2664231768', 'MENDOZA', 'SAN LUIS'),
+(15, 'TEO', 'BLANCO', '266754389', 'TEO@MAIL', '5367823145', 'CORDOBA', 'SAN LUIS'),
+(16, 'VICTORIA', 'ROSARIO', '4256341724', 'VICKI@MAIL', '2456378123', 'MISIONES 800', 'SAN LUIS');
 
 -- --------------------------------------------------------
 
@@ -211,7 +219,7 @@ ALTER TABLE `inmuebles`
 -- AUTO_INCREMENT de la tabla `inquilinos`
 --
 ALTER TABLE `inquilinos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
@@ -223,7 +231,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `propietarios`
 --
 ALTER TABLE `propietarios`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`

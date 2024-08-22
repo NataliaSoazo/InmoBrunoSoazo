@@ -29,6 +29,6 @@ public class Propietario
     [Required(ErrorMessage = "Campo obligatorio")]
     public string? Ciudad { get; set; }
     public string? RequestId { get; set; }
-   // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-    
+    // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
 }

@@ -14,58 +14,89 @@ public class PropietarioController : Controller
 
     public PropietarioController(ILogger<HomeController> logger)
     {
-    
+
         _logger = logger;
     }
 
-    public IActionResult Index (){
-         RepositorioPropietario rp = new RepositorioPropietario();
-         var lista = rp.GetPropietarios();
+    public IActionResult Index()
+    {
+        RepositorioPropietario rp = new RepositorioPropietario();
+        var lista = rp.GetPropietarios();
+        if (TempData.ContainsKey("Mensaje"))
+        {
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
         return View(lista);
     }
-    
+
     public IActionResult Editar(int id)
     {
-        if (id > 0){
+        if (id > 0)
+        {
             RepositorioPropietario rp = new RepositorioPropietario();
             var propietario = rp.getPropietario(id);
-            return View(propietario); 
-        } else {
+            return View(propietario);
+        }
+        else
+        {
             return View();
         }
     }
-    
-    public IActionResult Guardar( Propietario propietario)
-    {  
-        propietario.Nombre = propietario.Nombre.ToUpper();
-        propietario.Apellido = propietario.Apellido.ToUpper();
-        propietario.Email = propietario.Email.ToUpper();
-        propietario.Domicilio = propietario.Domicilio.ToUpper();
-        propietario.Ciudad = propietario.Ciudad.ToUpper();
-        RepositorioPropietario rp = new RepositorioPropietario();
-        
-        if(propietario.Id > 0){
-            rp.ModificarPropietario(propietario);
 
-        }else
-        rp.AltaPropietario(propietario);
-        return RedirectToAction(nameof(Index));
+    public IActionResult Guardar(Propietario propietario)
+    {
+        try
+        {
+            propietario.Nombre = propietario.Nombre.ToUpper();
+            propietario.Apellido = propietario.Apellido.ToUpper();
+            propietario.Email = propietario.Email.ToUpper();
+            propietario.Domicilio = propietario.Domicilio.ToUpper();
+            propietario.Ciudad = propietario.Ciudad.ToUpper();
+            RepositorioPropietario rp = new RepositorioPropietario();
+
+            if (propietario.Id > 0)
+            {
+                rp.ModificarPropietario(propietario);
+                TempData["Mensaje"] = "El propietario ha sido modificado";
+
+            }
+            else
+            {
+                rp.AltaPropietario(propietario);
+                TempData["Mensaje"] = "El propietario ha sido guardado";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            TempData["Mensaje"] = "Ocurrió un error al guardar el propietario";
+            return RedirectToAction(nameof(Index));
+        }
+
     }
-    
-     public IActionResult Eliminar( int id)
-    {  
+
+    public IActionResult Eliminar(int id)
+    {
+        try {
         RepositorioPropietario rp = new RepositorioPropietario();
         rp.EliminarPropietario(id);
+        TempData["Mensaje"] = "El propietario ha sido eliminado";
         return RedirectToAction(nameof(Index));
-    }    
-    public IActionResult Detalles( int id)
-    {  
-        RepositorioPropietario rp = new RepositorioPropietario();
-            var propietario = rp.getPropietario(id);
-            return View(propietario); 
-    }    
+        } catch (Exception ex)
+        {
+            TempData["Mensaje"] = "Ocurrio un error al eliminar el propietario";
+            return RedirectToAction(nameof(Index));
+        }
+    }
 
-// GET: Propietario/Busqueda
+    public IActionResult Detalles(int id)
+    {
+        RepositorioPropietario rp = new RepositorioPropietario();
+        var propietario = rp.getPropietario(id);
+        return View(propietario);
+    }
+
+    // GET: Propietario/Busqueda
     public IActionResult Busqueda()
     {
         try
@@ -77,11 +108,12 @@ public class PropietarioController : Controller
             throw;
         }
     }
-      //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
+    //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
     public IActionResult Buscar(string q)
     {
         try
-        {   RepositorioPropietario rp = new RepositorioPropietario();
+        {
+            RepositorioPropietario rp = new RepositorioPropietario();
             var res = rp.BuscarPorNombre(q);
             return Json(new { Datos = res });
         }

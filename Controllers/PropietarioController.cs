@@ -21,12 +21,27 @@ public class PropietarioController : Controller
     public IActionResult Index()
     {
         RepositorioPropietario rp = new RepositorioPropietario();
-        var lista = rp.GetPropietarios();
-        if (TempData.ContainsKey("Mensaje"))
+        IList<Propietario> lista = new List<Propietario>();
+        try
         {
-            ViewBag.Mensaje = TempData["Mensaje"];
+             lista = rp.GetPropietarios();
+            if (TempData.ContainsKey("Mensaje"))
+            {
+                ViewBag.Mensaje = TempData["Mensaje"];
+            }
+            else if (TempData.ContainsKey("Error"))
+            {
+                ViewBag.Error = TempData["Error"];
+            }
+            return View(lista);
         }
-        return View(lista);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener la lista de propietarios");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de propietarios";
+            ViewBag.Error = TempData["Error"];
+            return View(lista);
+        }
     }
 
     public IActionResult Editar(int id)
@@ -77,12 +92,14 @@ public class PropietarioController : Controller
 
     public IActionResult Eliminar(int id)
     {
-        try {
-        RepositorioPropietario rp = new RepositorioPropietario();
-        rp.EliminarPropietario(id);
-        TempData["Mensaje"] = "El propietario ha sido eliminado";
-        return RedirectToAction(nameof(Index));
-        } catch (Exception ex)
+        try
+        {
+            RepositorioPropietario rp = new RepositorioPropietario();
+            rp.EliminarPropietario(id);
+            TempData["Mensaje"] = "El propietario ha sido eliminado";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
         {
             TempData["Mensaje"] = "Ocurrio un error al eliminar el propietario";
             return RedirectToAction(nameof(Index));

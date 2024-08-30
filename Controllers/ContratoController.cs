@@ -15,32 +15,46 @@ public class ContratoController : Controller
     }
 
     public IActionResult Index()
-
-    { 
+    {
         RepositorioContrato rc = new RepositorioContrato();
-        var lista = rc.GetContratos();
-        if (TempData.ContainsKey("Mensaje"))
+        IList<Contrato> lista = new List<Contrato>();
+        try
         {
-            ViewBag.Mensaje = TempData["Mensaje"];
-        }else if (TempData.ContainsKey("Error"))
-        {
-            ViewBag.Error = TempData["Error"];
+            lista = rc.GetContratos();
+            if (TempData.ContainsKey("Mensaje"))
+            {
+                ViewBag.Mensaje = TempData["Mensaje"];
+            }
+            else if (TempData.ContainsKey("Error"))
+            {
+                ViewBag.Error = TempData["Error"];
+            }
+            return View(lista);
         }
-        
-        return View(lista);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener la lista de contratos");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de contratos";
+            ViewBag.Error = TempData["Error"];
+            return View(lista);
+        }
     }
     public IActionResult Editar(int id)
-         
-    {    RepositorioInmueble repoInmueble = new RepositorioInmueble();
-         ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
-         RepositorioInquilino repoInquilino = new RepositorioInquilino();
-         ViewBag.Inquilinos = repoInquilino.GetInquilinos();
 
-        if (id > 0){
+    {
+        RepositorioInmueble repoInmueble = new RepositorioInmueble();
+        ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
+        RepositorioInquilino repoInquilino = new RepositorioInquilino();
+        ViewBag.Inquilinos = repoInquilino.GetInquilinos();
+
+        if (id > 0)
+        {
             RepositorioContrato rc = new RepositorioContrato();
             var contrato = rc.GetContrato(id);
-            return View(contrato); 
-        } else {
+            return View(contrato);
+        }
+        else
+        {
             return View();
         }
     }
@@ -48,7 +62,7 @@ public class ContratoController : Controller
     public IActionResult Guardar(Contrato contrato)
     {
         try
-        {   
+        {
             RepositorioContrato rc = new RepositorioContrato();
             Boolean validado = rc.validarContrato(contrato);
 
@@ -92,10 +106,10 @@ public class ContratoController : Controller
         }
     }
 
-    public IActionResult Detalles( int id)
-    {  
+    public IActionResult Detalles(int id)
+    {
         RepositorioContrato rc = new RepositorioContrato();
-            var i = rc.GetContrato(id);
-            return View(i); 
-    }   
+        var i = rc.GetContrato(id);
+        return View(i);
+    }
 }

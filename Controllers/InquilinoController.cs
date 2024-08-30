@@ -21,12 +21,23 @@ public class InquilinoController : Controller
     public IActionResult Index()
     {
         RepositorioInquilino rp = new RepositorioInquilino();
-        var lista = rp.GetInquilinos();
-        if (TempData.ContainsKey("Mensaje"))
+        IList<Inquilino> lista = new List<Inquilino>();
+        try
         {
-            ViewBag.Mensaje = TempData["Mensaje"];
+            lista = rp.GetInquilinos();
+            if (TempData.ContainsKey("Mensaje"))
+            {
+                ViewBag.Mensaje = TempData["Mensaje"];
+            }
+            return View(lista);
         }
-        return View(lista);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener la lista de inquilinos");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de inquilinos";
+            ViewBag.Error = TempData["Error"];
+            return View(lista);
+        }
     }
 
     public IActionResult Editar(int id)

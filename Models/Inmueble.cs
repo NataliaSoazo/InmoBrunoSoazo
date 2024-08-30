@@ -16,6 +16,7 @@ public class Inmueble
     [Required(ErrorMessage = "Campo obligatorio")]
     public string? Uso { get; set; }
     [Display(Name = "AMBIENTES")]
+    [Range(1, 100, ErrorMessage = "La cantidad de ambientes debe ser mayor a 0")]
     [Required(ErrorMessage = "Campo obligatorio")]
     public int Ambientes { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]

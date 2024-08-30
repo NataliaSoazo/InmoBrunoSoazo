@@ -78,9 +78,8 @@ public class ContratoController : Controller
                 else
                     rc.AltaContrato(contrato);
                 return RedirectToAction(nameof(Index));
-
             }
-            else ViewBag.Error = "El contrato debe tener una duración mínima de dos años.";
+            else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
             return RedirectToAction(nameof(Index));
         }
         catch (System.Exception)

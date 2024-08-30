@@ -21,6 +21,8 @@ public class Inmueble
     public int Ambientes { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     [Display(Name = "PRECIO APROX.")]
+    [Range(1, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0")]
+    [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El precio debe ser un número válido con hasta dos decimales.")]
     public double? Precio { get; set; }
     [Required(ErrorMessage = "Campo obligatorio")]
     [StringLength(20, MinimumLength = 9, ErrorMessage = "Ingrese una latitud válida")]

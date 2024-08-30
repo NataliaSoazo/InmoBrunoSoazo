@@ -1,0 +1,82 @@
+@model Contrato
+@{
+    ViewData["Title"] = "Inmueble";
+    int id = Model == null? 0: Model.Id;
+}
+
+
+<div class="container text-aligne-center">
+    <h4>Contrato</h4>
+</div>
+
+<hr />
+<div class="row">
+    <div class="col-6">
+         <form asp-action="Guardar" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group col-2">
+                <label  class="control-label">CODIGO</label>
+                <input name="Id" class="form-control"  value="@id" readonly/>             
+            </div>
+            <div class="form-group col-5">
+                <label asp-for="FechaInicio" class="control-label"></label>
+                <input asp-for="FechaInicio" class="form-control" />
+                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group col-5">
+                <label asp-for="FechaTerm" class="control-label"></label>
+                <input asp-for="FechaTerm" class="form-control" />
+                <span asp-validation-for="FechaTerm" class="text-danger"></span>
+            </div>
+            <div class="form-group col-4">
+                <label asp-for="MontoMensual" class="control-label"></label>
+                <input asp-for="MontoMensual" class="form-control" />
+                <span asp-validation-for="MontoMensual" class="text-danger"></span>
+            </div>
+            <div class="form-group col-4">
+                <label asp-for="IdInquilino" class="control-label"></label>
+                <select class="form-control"  name="IdInquilino" id = "selectInquilinos">
+                    @foreach (var item in (IList<Inquilino>)ViewBag.Inquilinos)
+                    {
+                        @:<option @(item.Id == Model?.IdInquilino ? "selected" : "") value="@item.Id">@item.Apellido @item.Nombre</option>
+                    }
+                </select>
+            </div>
+        <div class="form-group  col-4">
+                <label asp-for="IdInmueble" class="control-label"></label>
+                <select class="form-control"  name="IdInmueble" id = "selectInmuebles">
+                    @foreach (var item in (IList<Inmueble>)ViewBag.Inmuebles)
+                    {
+                        @:<option @(item.Id == Model?.IdInmueble ? "selected" : "") value="@item.Id">@item.Direccion </option>
+                    }
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+    <a asp-action="Index">Volver al listado</a>
+</div>
+
+<script src="path/to/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#selectInquilinos').select2();
+});
+</script>
+script src="path/to/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#selectInmuebles"').select2();
+});
+</script>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

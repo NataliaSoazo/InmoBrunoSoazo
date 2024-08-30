@@ -31,4 +31,9 @@ public class Inquilino
     public string? Ciudad { get; set; }
     public string? RequestId { get; set; }
     // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+
+     private string ToString(){
+        return (this.Id)+" "+ this.Apellido+ " " + this.Nombre;
+    }
 }

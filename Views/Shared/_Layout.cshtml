@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PROYECTO_BRUNO_SOAZO.styles.css" asp-append-version="true" />
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body id="body">
     <header >
@@ -32,17 +32,29 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Inquilino" asp-action="Index">Inquilinos</a>
                         </li>
+                         <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Inmueble" asp-action="Index">Inmuebles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Contrato" asp-action="Index">Contrato</a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container center">
+        <main role="main" class="pb-3 justify-content-center" >
             @if(ViewBag.Mensaje != null)
             {
-                <div class="alert alert-info">
+                <div class="alert alert-success col-4 "  >
                     @ViewBag.Mensaje
+                </div>
+            }
+            @if(ViewBag.Error != null)
+            {
+                <div class="alert alert-danger col-4 "  >
+                    @ViewBag.Error
                 </div>
             }
             @RenderBody()

@@ -177,9 +177,7 @@ public class RepositorioContrato
     }
     public Boolean validarContrato(Contrato contrato)
     {
-        int difAnios = contrato.FechaTerm.Year - contrato.FechaInicio.Year;
-
-        if (contrato.FechaInicio < contrato.FechaTerm && difAnios >= 2)
+        if (contrato.FechaInicio < contrato.FechaTerm)
         {
             return true;
         }

@@ -19,46 +19,53 @@ public class PagoController : Controller
         IList<Pago> lista = new List<Pago>();
         /*try
         {*/
-            lista = rp.GetPagos();
-            if (TempData.ContainsKey("Mensaje"))
-            {
-                ViewBag.Mensaje = TempData["Mensaje"];
-            }
-            else if (TempData.ContainsKey("Error"))
-            {
-                ViewBag.Error = TempData["Error"];
-            }
-            return View(lista);
-       /* }
-        catch (Exception ex)
+        lista = rp.GetPagos();
+        if (TempData.ContainsKey("Mensaje"))
         {
-            _logger.LogError(ex, "Error al obtener la lista de pagos");
-            TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
+            ViewBag.Mensaje = TempData["Mensaje"];
+        }
+        else if (TempData.ContainsKey("Error"))
+        {
             ViewBag.Error = TempData["Error"];
-            return View(lista);
-       // }*/
+        }
+        return View(lista);
+        /* }
+         catch (Exception ex)
+         {
+             _logger.LogError(ex, "Error al obtener la lista de pagos");
+             TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
+             ViewBag.Error = TempData["Error"];
+             return View(lista);
+        // }*/
     }
 
-    public IActionResult Editar(int id)
-
+    public IActionResult Editar(int? id, int? idContrato)
     {
         RepositorioContrato repoContrato = new RepositorioContrato();
         ViewBag.Contratos = repoContrato.GetContratos();
 
-        if (id > 0)
+        var pago = new Pago();
+
+        if (id.HasValue && id.Value > 0)
         {
             RepositorioPago rp = new RepositorioPago();
-            var pago = rp.GetPago(id);
-            return View(pago);
+            pago = rp.GetPago(id.Value) ?? new Pago();
         }
-        else
+
+        if (idContrato.HasValue)
         {
-            return View();
+            pago.IdContrato = idContrato.Value;
         }
+
+        return View(pago);
     }
 
-    public IActionResult Guardar(Pago pago)
+    public IActionResult Guardar(Pago pago, int? idContrato)
     {
+        if (idContrato.HasValue)
+        {
+            pago.IdContrato = idContrato.Value;
+        }
         try
         {
             RepositorioPago rp = new RepositorioPago();
@@ -69,8 +76,10 @@ public class PagoController : Controller
                 return RedirectToAction(nameof(Index));
             }
             else
+            {
                 rp.AltaPago(pago);
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
         }
         catch (System.Exception)
         {

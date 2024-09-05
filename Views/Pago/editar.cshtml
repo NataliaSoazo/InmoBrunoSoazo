@@ -65,12 +65,21 @@
             </div>
             <div class="form-group col-4">
                 <label asp-for="IdContrato" class="control-label"></label>
-                <select class="form-control" name="IdContrato" id="selectContratos">
-                    @foreach (var item in (IList<Contrato>)ViewBag.Contratos)
-                    {
-                        @:<option @(item.Id == Model?.IdContrato ? "selected" : "") value="@item.Id"> @item.Id</option>
-                    }
-                </select>
+                @if (Model != null && Model.IdContrato > 0)
+                {
+                    <!-- Mostrar el IdContrato como solo lectura si ya está asignado -->
+                    <input asp-for="IdContrato" class="form-control" readonly value="@Model.IdContrato" />
+                }
+                else
+                {
+                    <!-- Mostrar el select si no hay un IdContrato asignado -->
+                    <select class="form-control" name="IdContrato" id="selectContratos">
+                        @foreach (var item in (IList<Contrato>)ViewBag.Contratos)
+                        {
+                            <option value="@item.Id"> @item.Id</option>
+                        }
+                    </select>
+                }
             </div>
             <div class="form-group">
                 <input type="submit" value="Guardar" class="btn btn-primary" />

@@ -25,18 +25,16 @@ namespace PROYECTO_BRUNO_SOAZO;
 public class UsuarioController : Controller
 {
     private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment environment;
-        private readonly RepositorioUsuario repositorio;
+    private readonly IWebHostEnvironment environment;
 
-        public UsuarioController(IConfiguration configuration, IWebHostEnvironment environment, RepositorioUsuario repositorio)
-        {
-            this.configuration = configuration;
-            this.environment = environment;
-            this.repositorio = repositorio;
-        }
+    public UsuarioController(IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        this.configuration = configuration;
+        this.environment = environment;
+    }
     public IActionResult Index()
     {
-        
+        RepositorioUsuario repositorio = new RepositorioUsuario();
         IList<Usuario> lista = new List<Usuario>();
         try
         {
@@ -67,48 +65,70 @@ public class UsuarioController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-  
+
     public ActionResult CrearUsuario(Usuario usuario)
     {
+        RepositorioUsuario repositorio = new RepositorioUsuario();
         if (!ModelState.IsValid)
             return View();
         try
         {
-            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: usuario.Clave,
-                    salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]),
-                    prf: KeyDerivationPrf.HMACSHA1,
-                    iterationCount: 1000,
-                    numBytesRequested: 256 / 8));
-            usuario.Clave = hashed;
+            string hashedPassword = HashPassword(usuario.Clave);
+            usuario.Clave = hashedPassword;
             usuario.Rol = User.IsInRole("Administrador") ? usuario.Rol : (int)enRoles.Empleado;
-            var nbreRnd = Guid.NewGuid();//posible nombre aleatorio
             int res = repositorio.AltaUsuario(usuario);
             if (usuario.AvatarFile != null && usuario.Id > 0)
             {
-                string wwwPath = environment.WebRootPath;
-                string path = Path.Combine(wwwPath, "ImgSubidas");
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                //Path.GetFileName(usuario.AvatarFile.FileName);//este nombre se puede repetir
-                string fileName = "avatar_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
-                string pathCompleto = Path.Combine(path, fileName);
-                usuario.Avatar = Path.Combine("/ImgSubidas", fileName);
-                // Esta operación guarda la foto en memoria en el ruta que necesitamos
-                using (FileStream stream = new FileStream(pathCompleto, FileMode.Create))
-                {
-                    usuario.AvatarFile.CopyTo(stream);
-                }
-                repositorio.ModificarUsuario(usuario);
+                GuardarAvatar(usuario); // Método separado para manejo de archivos
             }
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ViewBag.Roles = Usuario.ObtenerRoles();
-            return View();
+            TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    private string HashPassword(string password)
+    {
+        byte[] salt = System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]);
+        string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password: password,
+            salt: salt,
+            prf: KeyDerivationPrf.HMACSHA1,
+            iterationCount: 1000,
+            numBytesRequested: 256 / 8));
+        return hashed;
+    }
+
+    private void GuardarAvatar(Usuario usuario)
+    {
+        try {
+        string wwwPath = environment.WebRootPath;
+        string path = Path.Combine(wwwPath, "ImgSubidas");
+        // Crear el directorio si no existe
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        // Crear un nombre de archivo único con el ID del usuario
+        string fileName = "avatar_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
+        string fullPath = Path.Combine(path, fileName);
+        // Guardar la imagen en el servidor
+        using (FileStream stream = new FileStream(fullPath, FileMode.Create))
+        {
+            usuario.AvatarFile.CopyTo(stream);
+        }
+        // Guardar la ruta del avatar en el modelo de usuario
+        usuario.Avatar = Path.Combine("/ImgSubidas", fileName);
+        // Actualizar el usuario en la base de datos
+        RepositorioUsuario repositorio = new RepositorioUsuario();
+        repositorio.ModificarUsuario(usuario);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al guardar el avatar";
         }
     }
 
@@ -126,8 +146,8 @@ public class UsuarioController : Controller
         }
     }
 
-    
-   
+
+
 
     public IActionResult Guardar(Usuario usuario)
     {

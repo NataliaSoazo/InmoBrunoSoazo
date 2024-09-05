@@ -86,7 +86,6 @@ public class ContratoController : Controller
         {
             TempData["Error"] = "No se pudo completar la operación.";
             return RedirectToAction(nameof(Index));
-
         }
     }
     public IActionResult Eliminar(int id)

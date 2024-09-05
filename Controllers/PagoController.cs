@@ -17,8 +17,8 @@ public class PagoController : Controller
     {
         RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
-        try
-        {
+        /*try
+        {*/
             lista = rp.GetPagos();
             if (TempData.ContainsKey("Mensaje"))
             {
@@ -29,14 +29,14 @@ public class PagoController : Controller
                 ViewBag.Error = TempData["Error"];
             }
             return View(lista);
-        }
+       /* }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener la lista de pagos");
             TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
             ViewBag.Error = TempData["Error"];
             return View(lista);
-        }
+       // }*/
     }
 
     public IActionResult Editar(int id)

@@ -137,4 +137,21 @@ public class InmuebleController : Controller
         var i = rp.GetInmueble(id);
         return View(i);
     }
+
+    public IActionResult BuscarPropietarios(string buscar)
+    {
+        RepositorioPropietario rp = new RepositorioPropietario();
+        RepositorioInmueble ri = new RepositorioInmueble();
+
+        IList<Propietario> propietarios = rp.BuscarPorNombre(buscar);
+        IList<Inmueble> inmuebles = new List<Inmueble>();
+
+        foreach (var propietario in propietarios)
+        {
+            var inmueblesPropietario = ri.ObtenerPorPropietario(propietario.Id);
+            inmuebles = inmuebles.Concat(inmueblesPropietario).ToList();
+        }
+
+        return View("Index", inmuebles);
+    }
 }

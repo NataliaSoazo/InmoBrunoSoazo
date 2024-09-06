@@ -172,19 +172,24 @@ public class RepositorioPropietario
         return 0;
     }
 
-    public IList<Propietario> BuscarPorNombre(string nombre)
+    public IList<Propietario> BuscarPorNombre(string buscar)
     {
         var res = new List<Propietario>();
-        nombre = "%" + nombre + "%";
+        buscar = "%" + buscar + "%"; 
 
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"SELECT {nameof(Propietario.Id)},{nameof(Propietario.Nombre)},{nameof(Propietario.Apellido)},{nameof(Propietario.Dni)},{nameof(Propietario.Email)},{nameof(Propietario.Telefono)},{nameof(Propietario.Domicilio)},{nameof(Propietario.Ciudad)} FROM propietarios
-                      WHERE {nameof(Propietario.Nombre)} LIKE @{nameof(Propietario.Nombre)} OR {nameof(Propietario.Apellido)} LIKE @{nameof(Propietario.Nombre)}";
+            // Concatenamos nombre y apellido en la consulta SQL
+            var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)}, {nameof(Propietario.Dni)}, {nameof(Propietario.Email)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Domicilio)}, {nameof(Propietario.Ciudad)} 
+                    FROM propietarios
+                    WHERE CONCAT({nameof(Propietario.Nombre)}, ' ', {nameof(Propietario.Apellido)}) LIKE @buscar
+                    OR CONCAT({nameof(Propietario.Apellido)}, ' ', {nameof(Propietario.Nombre)}) LIKE @buscar
+                    OR {nameof(Propietario.Nombre)} LIKE @buscar
+                    OR {nameof(Propietario.Apellido)} LIKE @buscar";
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.Add(new MySqlParameter(nameof(nombre), MySqlDbType.VarChar) { Value = nombre });
+                command.Parameters.Add(new MySqlParameter("buscar", MySqlDbType.VarChar) { Value = buscar });
                 command.CommandType = CommandType.Text;
                 connection.Open();
 
@@ -200,7 +205,8 @@ public class RepositorioPropietario
                             Dni = reader.GetString(reader.GetOrdinal(nameof(Propietario.Dni))),
                             Telefono = reader.GetString(reader.GetOrdinal(nameof(Propietario.Telefono))),
                             Email = reader.GetString(reader.GetOrdinal(nameof(Propietario.Email))),
-
+                            Domicilio = reader.GetString(reader.GetOrdinal(nameof(Propietario.Domicilio))),
+                            Ciudad = reader.GetString(reader.GetOrdinal(nameof(Propietario.Ciudad)))
                         };
                         res.Add(p);
                     }

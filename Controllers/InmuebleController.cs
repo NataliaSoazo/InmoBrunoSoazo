@@ -39,6 +39,28 @@ public class InmuebleController : Controller
             return View(lista);
         }
     }
+
+    public IActionResult VerDisp()
+    {
+        RepositorioInmueble ri = new RepositorioInmueble();
+        IList<Inmueble> lista = new List<Inmueble>();
+        try
+        {
+            // Obtener la lista completa de inmuebles
+            lista = ri.ObtenerTodos();
+
+            // Filtrar solo los disponibles
+            var disponibles = lista.Where(i => i.Disponible == "SI").ToList();
+
+            // Retornar la vista "Index" con los inmuebles disponibles
+            return View("Index", disponibles);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrió un error al obtener los inmuebles disponibles.";
+            return RedirectToAction("Index");
+        }
+    }
     public IActionResult Editar(int id)
 
     {

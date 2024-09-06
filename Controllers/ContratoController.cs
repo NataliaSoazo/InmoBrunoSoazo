@@ -110,4 +110,20 @@ public class ContratoController : Controller
         var i = rc.GetContrato(id);
         return View(i);
     }
+
+    public IActionResult VerVigentes(){
+        RepositorioContrato rc = new RepositorioContrato();
+        IList<Contrato> lista = new List<Contrato>();
+        try
+        {
+            lista = rc.GetContratos();
+            lista = lista.Where(x => x.FechaTerm > DateTime.Now).ToList();
+            return View("Index", lista);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al obtener la lista de contratos vigentes";
+            return View(lista);
+        }
+    }
 }

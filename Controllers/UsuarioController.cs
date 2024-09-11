@@ -27,10 +27,13 @@ public class UsuarioController : Controller
     private readonly IConfiguration configuration;
     private readonly IWebHostEnvironment environment;
 
-    public UsuarioController(IConfiguration configuration, IWebHostEnvironment environment)
-    {
+     private readonly ILogger<HomeController> _logger;
+
+    public UsuarioController(ILogger<HomeController> logger, IConfiguration configuration, IWebHostEnvironment environment)
+    {    _logger = logger;
         this.configuration = configuration;
         this.environment = environment;
+       
     }
     public IActionResult Index()
     {
@@ -57,45 +60,45 @@ public class UsuarioController : Controller
             return View(lista);
         }
     }
-    public ActionResult Crear()
+    public IActionResult Crear()
     {
-        ViewBag.Roles = Usuario.ObtenerRoles();
-        return View();
+    RepositorioRol repoRol = new RepositorioRol();
+    ViewBag.Roles = repoRol.ObtenerRoles();
+    return View();
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
-
-    public ActionResult CrearUsuario(Usuario usuario)
+    public IActionResult Guardar(Usuario usuario)
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid)//valida que el formulario coincida con el modelo
             return View();
-        try
-        {
+       //try {
             string hashedPassword = HashPassword(usuario.Clave);
             usuario.Clave = hashedPassword;
-            usuario.Rol = User.IsInRole("Administrador") ? usuario.Rol : (int)enRoles.Empleado;
+            usuario.Rol = usuario.Rol;
+            usuario.Nombre = usuario.Nombre.ToUpper();
+            usuario.Apellido = usuario.Apellido.ToUpper();
             int res = repositorio.AltaUsuario(usuario);
             if (usuario.AvatarFile != null && usuario.Id > 0)
             {
                 GuardarAvatar(usuario); // Método separado para manejo de archivos
             }
             return RedirectToAction(nameof(Index));
-        }
+       /* }
         catch (Exception ex)
         {
             TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
             return RedirectToAction(nameof(Index));
-        }
+        }*/
     }
 
     private string HashPassword(string password)
     {
-        byte[] salt = System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]);
+    
         string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
-            salt: salt,
+            salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]),
             prf: KeyDerivationPrf.HMACSHA1,
             iterationCount: 1000,
             numBytesRequested: 256 / 8));
@@ -104,7 +107,7 @@ public class UsuarioController : Controller
 
     private void GuardarAvatar(Usuario usuario)
     {
-        try {
+       // try {
         string wwwPath = environment.WebRootPath;
         string path = Path.Combine(wwwPath, "ImgSubidas");
         // Crear el directorio si no existe
@@ -120,22 +123,24 @@ public class UsuarioController : Controller
         {
             usuario.AvatarFile.CopyTo(stream);
         }
-        // Guardar la ruta del avatar en el modelo de usuario
-        usuario.Avatar = Path.Combine("/ImgSubidas", fileName);
+        // Guardar la ruta del AvatarURL en el modelo de usuario
+        usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
         // Actualizar el usuario en la base de datos
         RepositorioUsuario repositorio = new RepositorioUsuario();
         repositorio.ModificarUsuario(usuario);
-        }
+       /* }
         catch (Exception ex)
         {
             TempData["Error"] = "Ocurrio un error al guardar el avatar";
-        }
+        }*/
     }
 
-    public IActionResult Editar(int id)
+
+   public IActionResult Editar(int id)
     {
         if (id > 0)
-        {
+        {   RepositorioRol repoRol = new RepositorioRol();
+            ViewBag.Roles = repoRol.ObtenerRoles();
             RepositorioUsuario repositorio = new RepositorioUsuario();
             var usuario = repositorio.getUsuario(id);
             return View(usuario);
@@ -145,38 +150,28 @@ public class UsuarioController : Controller
             return View();
         }
     }
-
-
-
-
-    public IActionResult Guardar(Usuario usuario)
-    {
-        try
+     [HttpPost]
+        public ActionResult EditDatos(int id, Usuario u)
         {
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            usuario.Nombre = usuario.Nombre.ToUpper();
-            usuario.Apellido = usuario.Apellido.ToUpper();
-
-            if (usuario.Id > 0)
+            var vista = nameof(Editar);//de que vista provengo
+            try
             {
-                repositorio.ModificarUsuario(usuario);
-                TempData["Mensaje"] = "El usuario ha sido modificado";
+                if (!User.IsInRole("Administrador"))//no soy admin
+                {
+                    vista = nameof(Perfil);//solo puedo ver mi perfil
+                    var usuarioActual = repositorio.ObtenerPorEmail(User.Identity.Name);
+                    if (usuarioActual.Id != id)//si no es admin, solo puede modificarse él mismo
+                        return RedirectToAction(nameof(Index), "Home");
+                }
+                // TODO: Add update logic here
 
+                return RedirectToAction(vista);
             }
-            else
-            {
-                repositorio.AltaUsuario(usuario);
-                TempData["Mensaje"] = "El usuario ha sido guardado";
+            catch (Exception ex)
+            {//colocar breakpoints en la siguiente línea por si algo falla
+                throw;
             }
-            return RedirectToAction(nameof(Index));
         }
-        catch (Exception ex)
-        {
-            TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
-            return RedirectToAction(nameof(Index));
-        }
-
-    }
 
     public IActionResult Eliminar(int id)
     {
@@ -197,34 +192,56 @@ public class UsuarioController : Controller
     public IActionResult Detalles(int id)
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
-        var usuario = repositorio.getUsuario(id);
+         var usuario = repositorio.getUsuario(id);
         return View(usuario);
     }
 
-    // GET: usuario/Busqueda
-    public IActionResult Busqueda()
-    {
-        try
+     [HttpPost]
+    public async Task<IActionResult> Loguin(Log login)
         {
-            return View();
+            
+            
+                var returnUrl = String.IsNullOrEmpty(TempData["returnUrl"] as string)? "/Home" : TempData["returnUrl"].ToString();                
+                if (ModelState.IsValid)
+                {
+                    string comprobarHash = HashPassword(login.Clave);
+                    RepositorioUsuario repositorio = new RepositorioUsuario();
+                    var e = repositorio.ObtenerPorEmail(login.Usuario);
+                    if (e == null || e.Clave != comprobarHash)
+                    {
+                        ModelState.AddModelError("", "El email o la clave no son correctos");
+                        TempData["returnUrl"] = returnUrl;
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, e.Correo),
+                        new Claim("FullName", e.Nombre + " " + e.Apellido),
+                       new Claim(ClaimTypes.Role, e.Datos.rol),
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+                    TempData.Remove("returnUrl");
+                    return RedirectToAction("Index", "Home");
+                }
+                
+                TempData["returnUrl"] = returnUrl;
+                 return RedirectToAction("Index", "Home");
+            
+          
         }
-        catch (Exception ex)
-        {//poner breakpoints para detectar errores
-            throw;
-        }
-    }
-    //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
-    public IActionResult Buscar(string q)
-    {
-        try
+          [Route("salir", Name = "logout")]
+        public async Task<ActionResult> Logout()
         {
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            var res = repositorio.BuscarPorNombre(q);
-            return Json(new { Datos = res });
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
-        catch (Exception ex)
-        {
-            return Json(new { Error = ex.Message });
-        }
-    }
+    
 }

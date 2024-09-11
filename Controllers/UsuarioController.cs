@@ -153,24 +153,7 @@ public class UsuarioController : Controller
      [HttpPost]
         public ActionResult EditDatos(int id, Usuario u)
         {
-            var vista = nameof(Editar);//de que vista provengo
-            try
-            {
-                if (!User.IsInRole("Administrador"))//no soy admin
-                {
-                    vista = nameof(Perfil);//solo puedo ver mi perfil
-                    var usuarioActual = repositorio.ObtenerPorEmail(User.Identity.Name);
-                    if (usuarioActual.Id != id)//si no es admin, solo puede modificarse él mismo
-                        return RedirectToAction(nameof(Index), "Home");
-                }
-                // TODO: Add update logic here
-
-                return RedirectToAction(vista);
-            }
-            catch (Exception ex)
-            {//colocar breakpoints en la siguiente línea por si algo falla
-                throw;
-            }
+            return RedirectToAction(nameof(Index));
         }
 
     public IActionResult Eliminar(int id)

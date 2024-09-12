@@ -59,7 +59,8 @@
                 <a asp-action="Detalles" asp-route-id=@item.Id><i class="fa fa-eye " style="font-size:25px;" id="detalles"></i></a>
                 <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil " style="font-size:25px;" id="edi"></i></a>
                 <a href="#"onclick="eliminar('@item.Id')" ><i class="fa fa-trash " style="font-size:25px;"id="eli"></i></a>
-                <a asp-controller="Pago" asp-action="Editar" asp-route-idContrato="@item.Id"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
+                <a asp-controller="Pago" asp-action="Editar" asp-route-id="@item.Id"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i></a>
+                <a asp-controller="Pago" asp-action="PagosContrato" asp-route-id="@item.Id"><i class="fa fa-bars" style="font-size:25px;" id="pagosC"></i></a>
             </td>
             </tr>
         }

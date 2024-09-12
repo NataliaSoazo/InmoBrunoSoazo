@@ -126,4 +126,21 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
+
+    public IActionResult ListarContratosInmueble(int id){
+        RepositorioContrato rc = new RepositorioContrato();
+        IList<Contrato> lista = new List<Contrato>();
+        try
+        {
+            lista = rc.GetContratos();
+            lista = lista.Where(x => x.IdInmueble == id).ToList();
+            return View("Index", lista);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al obtener la lista de contratos vigentes";
+            return View(lista);
+        }
+    }
+
 }

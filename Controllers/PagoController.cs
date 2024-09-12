@@ -17,26 +17,26 @@ public class PagoController : Controller
     {
         RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
-        /*try
-        {*/
-        lista = rp.GetPagos();
-        if (TempData.ContainsKey("Mensaje"))
+        try
         {
-            ViewBag.Mensaje = TempData["Mensaje"];
+            lista = rp.GetPagos();
+            if (TempData.ContainsKey("Mensaje"))
+            {
+                ViewBag.Mensaje = TempData["Mensaje"];
+            }
+            else if (TempData.ContainsKey("Error"))
+            {
+                ViewBag.Error = TempData["Error"];
+            }
+            return View(lista);
         }
-        else if (TempData.ContainsKey("Error"))
-        {
-            ViewBag.Error = TempData["Error"];
-        }
-        return View(lista);
-        /* }
          catch (Exception ex)
-         {
-             _logger.LogError(ex, "Error al obtener la lista de pagos");
-             TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
-             ViewBag.Error = TempData["Error"];
-             return View(lista);
-        // }*/
+        {
+            _logger.LogError(ex, "Error al obtener la lista de pagos");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
+            ViewBag.Error = TempData["Error"];
+            return View(lista);
+        }
     }
 
     public IActionResult Editar(int? id, int? idContrato)
@@ -111,4 +111,23 @@ public class PagoController : Controller
         var p = rp.GetPago(id);
         return View(p);
     }
+
+    public IActionResult PagosContrato(int id)
+    {
+        RepositorioPago rp = new RepositorioPago();
+        IList<Pago> lista = new List<Pago>();
+        try
+        {
+            lista = rp.GetPagos();
+            lista = lista.Where(x => x.IdContrato == id).ToList();
+            return View("Index", lista);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
+            return View("Index", lista);
+        }
+    }
+
+
 }

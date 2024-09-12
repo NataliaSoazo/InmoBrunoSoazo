@@ -16,16 +16,16 @@ public class Usuario
 	public int Id { get; set; }
 	[Required]
 	[Display(Name = "NOMBRE")]
-	public string Nombre { get; set; }
+	public string? Nombre { get; set; }
 	[Required]
 	[Display(Name = "APELLIDO")]
-	public string Apellido { get; set; }
+	public string? Apellido { get; set; }
 	[Required, EmailAddress]
 	[Display(Name = "E- MAIL")]
-	public string Correo { get; set; }
-	[Required, DataType(DataType.Password)]
+	public string? Correo { get; set; }
+	[DataType(DataType.Password)]
 	[Display(Name = "CLAVE")]
-	public string Clave { get; set; }
+	public string? Clave { get; set; }
 	[Display(Name = "AVATAR")]
 	public string? AvatarURL { get; set; }
 	[NotMapped]//Para EF

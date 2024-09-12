@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
+using System.Net.WebSockets;
 
 namespace PROYECTO_BRUNO_SOAZO;
 
@@ -27,13 +28,14 @@ public class UsuarioController : Controller
     private readonly IConfiguration configuration;
     private readonly IWebHostEnvironment environment;
 
-     private readonly ILogger<HomeController> _logger;
+    private readonly ILogger<HomeController> _logger;
 
     public UsuarioController(ILogger<HomeController> logger, IConfiguration configuration, IWebHostEnvironment environment)
-    {    _logger = logger;
+    {
+        _logger = logger;
         this.configuration = configuration;
         this.environment = environment;
-       
+
     }
     public IActionResult Index()
     {
@@ -62,9 +64,9 @@ public class UsuarioController : Controller
     }
     public IActionResult Crear()
     {
-    RepositorioRol repoRol = new RepositorioRol();
-    ViewBag.Roles = repoRol.ObtenerRoles();
-    return View();
+        RepositorioRol repoRol = new RepositorioRol();
+        ViewBag.Roles = repoRol.ObtenerRoles();
+        return View();
     }
 
     [HttpPost]
@@ -73,7 +75,8 @@ public class UsuarioController : Controller
         RepositorioUsuario repositorio = new RepositorioUsuario();
         if (!ModelState.IsValid)//valida que el formulario coincida con el modelo
             return View();
-       //try {
+        try
+        {
             string hashedPassword = HashPassword(usuario.Clave);
             usuario.Clave = hashedPassword;
             usuario.Rol = usuario.Rol;
@@ -85,17 +88,17 @@ public class UsuarioController : Controller
                 GuardarAvatar(usuario); // Método separado para manejo de archivos
             }
             return RedirectToAction(nameof(Index));
-       /* }
+        }
         catch (Exception ex)
         {
             TempData["Mensaje"] = "Ocurrió un error al guardar el usuario";
             return RedirectToAction(nameof(Index));
-        }*/
+        }
     }
 
     private string HashPassword(string password)
     {
-    
+
         string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]),
@@ -107,39 +110,42 @@ public class UsuarioController : Controller
 
     private void GuardarAvatar(Usuario usuario)
     {
-       // try {
-        string wwwPath = environment.WebRootPath;
-        string path = Path.Combine(wwwPath, "ImgSubidas");
-        // Crear el directorio si no existe
-        if (!Directory.Exists(path))
+        try
         {
-            Directory.CreateDirectory(path);
+            string wwwPath = environment.WebRootPath;
+            string path = Path.Combine(wwwPath, "ImgSubidas");
+            // Crear el directorio si no existe
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            // Crear un nombre de archivo único con el ID del usuario
+            string fileName = "avatar_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
+            string fullPath = Path.Combine(path, fileName);
+            // Guardar la imagen en el servidor
+            using (FileStream stream = new FileStream(fullPath, FileMode.Create))
+            {
+                usuario.AvatarFile.CopyTo(stream);
+            }
+            // Guardar la ruta del AvatarURL en el modelo de usuario
+            usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
+            // Actualizar el usuario en la base de datos
+            RepositorioUsuario repositorio = new RepositorioUsuario();
+            repositorio.ModificarUsuario(usuario);
         }
-        // Crear un nombre de archivo único con el ID del usuario
-        string fileName = "avatar_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
-        string fullPath = Path.Combine(path, fileName);
-        // Guardar la imagen en el servidor
-        using (FileStream stream = new FileStream(fullPath, FileMode.Create))
-        {
-            usuario.AvatarFile.CopyTo(stream);
-        }
-        // Guardar la ruta del AvatarURL en el modelo de usuario
-        usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
-        // Actualizar el usuario en la base de datos
-        RepositorioUsuario repositorio = new RepositorioUsuario();
-        repositorio.ModificarUsuario(usuario);
-       /* }
         catch (Exception ex)
         {
             TempData["Error"] = "Ocurrio un error al guardar el avatar";
-        }*/
+        }
     }
 
-
-   public IActionResult Editar(int id)
+    [HttpGet]
+    public IActionResult Editar(int id)
     {
+        try{
         if (id > 0)
-        {   RepositorioRol repoRol = new RepositorioRol();
+        {
+            RepositorioRol repoRol = new RepositorioRol();
             ViewBag.Roles = repoRol.ObtenerRoles();
             RepositorioUsuario repositorio = new RepositorioUsuario();
             var usuario = repositorio.getUsuario(id);
@@ -149,12 +155,48 @@ public class UsuarioController : Controller
         {
             return View();
         }
-    }
-     [HttpPost]
-        public ActionResult EditDatos(int id, Usuario u)
+        }
+        catch (Exception ex)
         {
+            TempData["Error"] = "Ocurrio un error al obtener los datos del usuario";
             return RedirectToAction(nameof(Index));
         }
+    }
+    [HttpPost]
+    public IActionResult Editar(int id, Usuario u)
+    {
+        //try
+        //{
+            if (!ModelState.IsValid)
+            {
+                return View(u); // Retorna con errores de validación
+            }
+
+            RepositorioUsuario ru = new RepositorioUsuario();
+            var usuarioExistente = ru.getUsuario(id);
+
+            if (usuarioExistente != null)
+            {
+                usuarioExistente.Nombre = u.Nombre.ToUpper();
+                usuarioExistente.Apellido = u.Apellido.ToUpper();
+                usuarioExistente.Correo = u.Correo;
+                GuardarAvatar(usuarioExistente);
+                ru.EditarDatos(usuarioExistente);
+                TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction(nameof(Index));
+            }
+        //}
+        /*catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al actualizar los datos del usuario";
+            return RedirectToAction(nameof(Index));
+        }*/
+    }
 
     public IActionResult Eliminar(int id)
     {
@@ -175,56 +217,56 @@ public class UsuarioController : Controller
     public IActionResult Detalles(int id)
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
-         var usuario = repositorio.getUsuario(id);
+        var usuario = repositorio.getUsuario(id);
         return View(usuario);
     }
 
-     [HttpPost]
+    [HttpPost]
     public async Task<IActionResult> Loguin(Log login)
-        {
-            
-            
-                var returnUrl = String.IsNullOrEmpty(TempData["returnUrl"] as string)? "/Home" : TempData["returnUrl"].ToString();                
-                if (ModelState.IsValid)
-                {
-                    string comprobarHash = HashPassword(login.Clave);
-                    RepositorioUsuario repositorio = new RepositorioUsuario();
-                    var e = repositorio.ObtenerPorEmail(login.Usuario);
-                    if (e == null || e.Clave != comprobarHash)
-                    {
-                        ModelState.AddModelError("", "El email o la clave no son correctos");
-                        TempData["returnUrl"] = returnUrl;
-                        return RedirectToAction("Index", "Home");
-                    }
+    {
 
-                    var claims = new List<Claim>
+
+        var returnUrl = String.IsNullOrEmpty(TempData["returnUrl"] as string) ? "/Home" : TempData["returnUrl"].ToString();
+        if (ModelState.IsValid)
+        {
+            string comprobarHash = HashPassword(login.Clave);
+            RepositorioUsuario repositorio = new RepositorioUsuario();
+            var e = repositorio.ObtenerPorEmail(login.Usuario);
+            if (e == null || e.Clave != comprobarHash)
+            {
+                ModelState.AddModelError("", "El email o la clave no son correctos");
+                TempData["returnUrl"] = returnUrl;
+                return RedirectToAction("Index", "Home");
+            }
+
+            var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, e.Correo),
                         new Claim("FullName", e.Nombre + " " + e.Apellido),
                        new Claim(ClaimTypes.Role, e.Datos.rol),
                     };
 
-                    var claimsIdentity = new ClaimsIdentity(
-                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                    await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-                    TempData.Remove("returnUrl");
-                    return RedirectToAction("Index", "Home");
-                }
-                
-                TempData["returnUrl"] = returnUrl;
-                 return RedirectToAction("Index", "Home");
-            
-          
-        }
-          [Route("salir", Name = "logout")]
-        public async Task<ActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity));
+            TempData.Remove("returnUrl");
             return RedirectToAction("Index", "Home");
         }
-    
+
+        TempData["returnUrl"] = returnUrl;
+        return RedirectToAction("Index", "Home");
+
+
+    }
+    [Route("salir", Name = "logout")]
+    public async Task<ActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction("Index", "Home");
+    }
+
 }

@@ -173,8 +173,7 @@ public class RepositorioUsuario
             var sql = @$"UPDATE Usuarios 
             SET {nameof(Usuario.Nombre)} = @{nameof(Usuario.Nombre)},
             {nameof(Usuario.Apellido)} = @{nameof(Usuario.Apellido)},
-            {nameof(Usuario.Correo)} = @{nameof(Usuario.Correo)},
-            {nameof(Usuario.AvatarURL)} = @{nameof(Usuario.AvatarURL)}
+            {nameof(Usuario.Correo)} = @{nameof(Usuario.Correo)}
             WHERE {nameof(Usuario.Id)} = @{nameof(Usuario.Id)} ";
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -182,8 +181,44 @@ public class RepositorioUsuario
                 command.Parameters.AddWithValue($"@{nameof(Usuario.Nombre)}", usuario.Nombre);
                 command.Parameters.AddWithValue($"@{nameof(Usuario.Apellido)}", usuario.Apellido);
                 command.Parameters.AddWithValue($"@{nameof(Usuario.Correo)}", usuario.Correo);
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        return 0;
+    }
+          public int EditarAvatar(Usuario usuario)
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"UPDATE Usuarios 
+            SET 
+            {nameof(Usuario.AvatarURL)} = @{nameof(Usuario.AvatarURL)}
+            WHERE {nameof(Usuario.Id)} = @{nameof(Usuario.Id)} ";
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue($"@{nameof(Usuario.Id)}", usuario.Id);
                 command.Parameters.AddWithValue($"@{nameof(Usuario.AvatarURL)}", usuario.AvatarURL);
-
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        return 0;
+    }
+     public int EditarClave(Usuario usuario)
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"UPDATE Usuarios 
+            SET 
+            {nameof(Usuario.Clave)} = @{nameof(Usuario.Clave)}
+            WHERE {nameof(Usuario.Id)} = @{nameof(Usuario.Id)} ";
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue($"@{nameof(Usuario.Id)}", usuario.Id);
+                command.Parameters.AddWithValue($"@{nameof(Usuario.Clave)}", usuario.Clave);
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();

@@ -87,6 +87,10 @@ public class UsuarioController : Controller
             {
                 GuardarAvatar(usuario); // Método separado para manejo de archivos
             }
+            else{
+                 usuario.AvatarURL = Path.Combine("/ImgSubidas","anonimo.jpg" );
+                repositorio.ModificarUsuario(usuario);
+            }
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -131,7 +135,7 @@ public class UsuarioController : Controller
             usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
             // Actualizar el usuario en la base de datos
             RepositorioUsuario repositorio = new RepositorioUsuario();
-            repositorio.ModificarUsuario(usuario);
+            repositorio.EditarAvatar(usuario);
         }
         catch (Exception ex)
         {
@@ -165,8 +169,8 @@ public class UsuarioController : Controller
     [HttpPost]
     public IActionResult Editar(int id, Usuario u)
     {
-        //try
-        //{
+        try
+        {
             if (!ModelState.IsValid)
             {
                 return View(u); // Retorna con errores de validación
@@ -180,7 +184,10 @@ public class UsuarioController : Controller
                 usuarioExistente.Nombre = u.Nombre.ToUpper();
                 usuarioExistente.Apellido = u.Apellido.ToUpper();
                 usuarioExistente.Correo = u.Correo;
-                GuardarAvatar(usuarioExistente);
+                if(u.AvatarFile!=null){
+                    usuarioExistente.AvatarFile = u.AvatarFile;
+                    GuardarAvatar(usuarioExistente);
+                }
                 ru.EditarDatos(usuarioExistente);
                 TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
                 return RedirectToAction(nameof(Index));
@@ -190,12 +197,36 @@ public class UsuarioController : Controller
                 TempData["Error"] = "Usuario no encontrado";
                 return RedirectToAction(nameof(Index));
             }
-        //}
-        /*catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             TempData["Error"] = "Ocurrio un error al actualizar los datos del usuario";
             return RedirectToAction(nameof(Index));
-        }*/
+        }
+    }
+     [HttpPost]
+    public IActionResult CambiarContraseña(int id, Usuario u)
+    {
+    try
+    {
+               RepositorioUsuario ru = new RepositorioUsuario();
+                var user = ru.getUsuario(id);
+               if(user!= null){
+                user.Clave = HashPassword(u.Clave);
+                ru.EditarClave(user);
+                TempData["Mensaje"] = "Clave editada correctamente";
+                return RedirectToAction(nameof(Index));
+               }else{
+                 TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction(nameof(Index));
+                        
+            }
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al actualizar los datos del usuario";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     public IActionResult Eliminar(int id)

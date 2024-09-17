@@ -170,6 +170,10 @@ public class ContratoController : Controller
             TempData["Error"] = "Contrato no encontrado";
             return RedirectToAction(nameof(Index));
         }
+        if(contrato.FechaTerm > DateTime.Now){
+            TempData["Error"] = "El contrato aun no ha terminado";
+            return RedirectToAction(nameof(Index));    
+        }
         var nuevoContrato = new Contrato
         {
             IdInmueble = contrato.IdInmueble,

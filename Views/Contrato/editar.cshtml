@@ -71,22 +71,27 @@
         var inmuebles = @Html.Raw(inmueblesJson);
         var contratos = @Html.Raw(contratosJson);
 
-        console.log("Inmuebles:", inmuebles);
-        console.log("Contratos:", contratos);
-
         function actualizarInmuebles() {
             var fechaInicio = $('#fechaInicio').val();
             var fechaTerm = $('#fechaTerm').val();
+            var contratoId = '@Model?.Id';  // Aquí obtenemos el ID del contrato actual
+            var inmuebleSeleccionadoId = @Model?.IdInmueble; // Aquí obtenemos el ID del inmueble actualmente seleccionado
 
             var fechaInicioDate = fechaInicio ? new Date(fechaInicio) : null;
             var fechaTermDate = fechaTerm ? new Date(fechaTerm) : null;
 
             var inmueblesFiltrados = inmuebles.filter(function (inmueble) {
+                // Siempre incluir el inmueble seleccionado si estamos editando o renovando
+                if (inmueble.Id === inmuebleSeleccionadoId) {
+                    return true;
+                }
+
                 // Filtrar por disponibilidad primero
                 if (inmueble.Disponible === 'NO') {
                     return false;
                 }
 
+                // Filtrar por fechas de ocupación
                 if (fechaInicioDate && fechaTermDate) {
                     return !contratos.some(function (contrato) {
                         var fechaInicioOcupado = new Date(contrato.FechaInicio);
@@ -108,20 +113,26 @@
             $selectInmuebles.empty();
             if (inmueblesFiltrados.length > 0) {
                 inmueblesFiltrados.forEach(function (inmueble) {
-                    $selectInmuebles.append('<option value="' + inmueble.Id + '">' + inmueble.Id + ' - ' + inmueble.Direccion + '</option>');
+                    var isSelected = inmueble.Id === inmuebleSeleccionadoId ? "selected" : "";
+                    $selectInmuebles.append('<option value="' + inmueble.Id + '" ' + isSelected + '>' + inmueble.Id + ' - ' + inmueble.Direccion + '</option>');
                 });
+
+                // Seleccionar el inmueble actual en el modo de edición/renovación
+                if (inmuebleSeleccionadoId) {
+                    $selectInmuebles.val(inmuebleSeleccionadoId).change();
+                }
             } else {
                 $selectInmuebles.append('<option value="">No hay inmuebles disponibles</option>');
             }
         }
 
+        // Llamar a la función para inicializar la lista de inmuebles
         actualizarInmuebles();
 
+        // Actualizar la lista cuando cambien las fechas
         $('#fechaInicio, #fechaTerm').on('change', function () {
             actualizarInmuebles();
         });
-
-        $('#selectInquilinos').select2();
     });
 </script>
 

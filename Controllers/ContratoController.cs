@@ -49,9 +49,9 @@ public class ContratoController : Controller
         RepositorioInquilino repoInquilino = new RepositorioInquilino();
         ViewBag.Inquilinos = repoInquilino.GetInquilinos();
         var inmueblesJson = Newtonsoft.Json.JsonConvert.SerializeObject(inmuebles);
-        ViewBag.InmueblesJson = inmueblesJson; 
+        ViewBag.InmueblesJson = inmueblesJson;
         var contratosJson = Newtonsoft.Json.JsonConvert.SerializeObject(contratos);
-        ViewBag.ContratosJson = contratosJson; 
+        ViewBag.ContratosJson = contratosJson;
 
         if (id > 0)
         {
@@ -117,7 +117,8 @@ public class ContratoController : Controller
         return View(i);
     }
 
-    public IActionResult VerVigentes(){
+    public IActionResult VerVigentes()
+    {
         RepositorioContrato rc = new RepositorioContrato();
         IList<Contrato> lista = new List<Contrato>();
         try
@@ -133,7 +134,8 @@ public class ContratoController : Controller
         }
     }
 
-    public IActionResult ListarContratosInmueble(int id){
+    public IActionResult ListarContratosInmueble(int id)
+    {
         RepositorioContrato rc = new RepositorioContrato();
         IList<Contrato> lista = new List<Contrato>();
         try
@@ -149,5 +151,40 @@ public class ContratoController : Controller
         }
     }
 
+    public IActionResult Renovar(int id)
+    {
+        RepositorioContrato rc = new RepositorioContrato();
+        var contrato = rc.GetContrato(id);
+        RepositorioContrato repoContrato = new RepositorioContrato();
+        var contratos = repoContrato.GetContratos();
+        RepositorioInmueble repoInmueble = new RepositorioInmueble();
+        var inmuebles = repoInmueble.ObtenerTodos();
+        RepositorioInquilino repoInquilino = new RepositorioInquilino();
+        ViewBag.Inquilinos = repoInquilino.GetInquilinos();
+        var inmueblesJson = Newtonsoft.Json.JsonConvert.SerializeObject(inmuebles);
+        ViewBag.InmueblesJson = inmueblesJson;
+        var contratosJson = Newtonsoft.Json.JsonConvert.SerializeObject(contratos);
+        ViewBag.ContratosJson = contratosJson;
+        if (contrato == null)
+        {
+            TempData["Error"] = "Contrato no encontrado";
+            return RedirectToAction(nameof(Index));
+        }
+        if(contrato.FechaTerm > DateTime.Now){
+            TempData["Error"] = "El contrato aun no ha terminado";
+            return RedirectToAction(nameof(Index));    
+        }
+        var nuevoContrato = new Contrato
+        {
+            IdInmueble = contrato.IdInmueble,
+            IdInquilino = contrato.IdInquilino,
+            MontoMensual = contrato.MontoMensual,
+            FechaInicio = DateTime.Now,
+            FechaTerm = DateTime.Now.AddYears(1)
+        };
 
+        // Pasar el nuevo contrato a la vista
+        return View("editar", nuevoContrato);
+    }
 }
+

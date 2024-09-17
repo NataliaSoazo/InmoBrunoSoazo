@@ -115,7 +115,12 @@ public class UsuarioController : Controller
     private void GuardarAvatar(Usuario usuario)
     {
         try
-        {
+        {   if(usuario.AvatarURL!= null && usuario.AvatarURL!=Path.Combine("/ImgSubidas","anonimo.jpg"))
+            {
+            var uri = new Uri(usuario.AvatarURL);
+            var rutaVieja = Path.GetFileName(uri.LocalPath);
+            System.IO.File.Delete(rutaVieja);
+            }
             string wwwPath = environment.WebRootPath;
             string path = Path.Combine(wwwPath, "ImgSubidas");
             // Crear el directorio si no existe
@@ -124,7 +129,10 @@ public class UsuarioController : Controller
                 Directory.CreateDirectory(path);
             }
             // Crear un nombre de archivo único con el ID del usuario
-            string fileName = "avatar_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
+             Random random = new Random();
+            // Generar un número entero aleatorio entre 0 (inclusive) y 10 (exclusivo)
+             int aleacion = random.Next(10);  
+            string fileName = aleacion + "av_"+ usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
             string fullPath = Path.Combine(path, fileName);
             // Guardar la imagen en el servidor
             using (FileStream stream = new FileStream(fullPath, FileMode.Create))
@@ -267,14 +275,14 @@ public class UsuarioController : Controller
             {
                 ModelState.AddModelError("", "El email o la clave no son correctos");
                 TempData["returnUrl"] = returnUrl;
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Loguin", "Home");
             }
 
             var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, e.Correo),
-                        new Claim("FullName", e.Nombre + " " + e.Apellido),
-                       new Claim(ClaimTypes.Role, e.Datos.rol),
+                    new Claim(ClaimTypes.Name, e.Correo),
+                    new Claim("FullName", e.Nombre + " " + e.Apellido),
+                    new Claim(ClaimTypes.Role, e.Datos.rol),
                     };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -286,9 +294,8 @@ public class UsuarioController : Controller
             TempData.Remove("returnUrl");
             return RedirectToAction("Index", "Home");
         }
-
         TempData["returnUrl"] = returnUrl;
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Loguin", "Home");
 
 
     }

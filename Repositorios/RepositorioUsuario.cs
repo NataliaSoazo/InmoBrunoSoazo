@@ -288,7 +288,7 @@ public class RepositorioUsuario
         Usuario? usuario = null;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.AvatarURL)}, r.{nameof(Rol.rol)}, r.{nameof(Rol.Numero)}  
+            var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.Clave)}, u.{nameof(Usuario.AvatarURL)}, r.{nameof(Rol.rol)}, r.{nameof(Rol.Numero)}  
         FROM usuarios u INNER JOIN roles r ON u.{nameof(Usuario.Rol)} = r.{nameof(Rol.Numero)} WHERE u.{nameof(Usuario.Correo)} = @{nameof(Usuario.Correo)}";
 
             using (var command = new MySqlCommand(sql, connection))
@@ -305,6 +305,7 @@ public class RepositorioUsuario
                             Nombre = reader.GetString(reader.GetOrdinal(nameof(Usuario.Nombre))),
                             Apellido = reader.GetString(reader.GetOrdinal(nameof(Usuario.Apellido))),
                             Correo = reader.GetString(reader.GetOrdinal(nameof(Usuario.Correo))),
+                            Clave = reader.GetString(reader.GetOrdinal(nameof(Usuario.Clave))),
                             AvatarURL = reader.GetString(reader.GetOrdinal(nameof(Usuario.AvatarURL))),
                             Datos = new Rol
                             {

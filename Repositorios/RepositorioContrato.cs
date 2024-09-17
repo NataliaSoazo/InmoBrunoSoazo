@@ -185,4 +185,28 @@ public class RepositorioContrato
             return false;
     }
 
+    public List<Inmueble> obtenerInmDisp(DateTime fechaInicio, DateTime fechaFin){
+        var contratos = GetContratos();
+        RepositorioInmueble ri = new RepositorioInmueble();
+        var inmuebles = ri.ObtenerTodos();
+
+         var inmueblesOcupadosIds = contratos
+            .Where(contrato =>
+                (fechaInicio >= contrato.FechaInicio && fechaInicio <= contrato.FechaTerm) || // Fecha inicio está dentro de un contrato existente
+                (fechaFin >= contrato.FechaInicio && fechaFin <= contrato.FechaTerm) ||     // Fecha fin está dentro de un contrato existente
+                (fechaInicio <= contrato.FechaInicio && fechaFin >= contrato.FechaTerm)      // El nuevo contrato abarca todo el periodo de un contrato existente
+            )
+            .Select(contrato => contrato.IdInmueble)
+            .Distinct()
+            .ToList();
+
+        // Filtrar inmuebles disponibles
+        var inmueblesDisponibles = inmuebles
+            .Where(inmueble => !inmueblesOcupadosIds.Contains(inmueble.Id))
+            .ToList();
+
+        return inmueblesDisponibles;
+
+    }
+
 }

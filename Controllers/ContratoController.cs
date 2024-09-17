@@ -42,10 +42,16 @@ public class ContratoController : Controller
     public IActionResult Editar(int id)
 
     {
+        RepositorioContrato repoContrato = new RepositorioContrato();
+        var contratos = repoContrato.GetContratos();
         RepositorioInmueble repoInmueble = new RepositorioInmueble();
-        ViewBag.Inmuebles = repoInmueble.ObtenerTodos();
+        var inmuebles = repoInmueble.ObtenerTodos();
         RepositorioInquilino repoInquilino = new RepositorioInquilino();
         ViewBag.Inquilinos = repoInquilino.GetInquilinos();
+        var inmueblesJson = Newtonsoft.Json.JsonConvert.SerializeObject(inmuebles);
+        ViewBag.InmueblesJson = inmueblesJson; 
+        var contratosJson = Newtonsoft.Json.JsonConvert.SerializeObject(contratos);
+        ViewBag.ContratosJson = contratosJson; 
 
         if (id > 0)
         {
@@ -142,5 +148,6 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
+
 
 }

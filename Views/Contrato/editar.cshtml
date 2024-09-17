@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Inmueble";
     int id = Model == null? 0: Model.Id;
+    var inmueblesJson = ViewBag.InmueblesJson;
+    var contratosJson = ViewBag.ContratosJson;
 }
 
 
@@ -20,12 +22,12 @@
             </div>
             <div class="form-group col-5">
                 <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
+                <input asp-for="FechaInicio" class="form-control" id="fechaInicio" />
                 <span asp-validation-for="FechaInicio" class="text-danger"></span>
             </div>
             <div class="form-group col-5">
                 <label asp-for="FechaTerm" class="control-label"></label>
-                <input asp-for="FechaTerm" class="form-control" />
+                <input asp-for="FechaTerm" class="form-control" id="fechaTerm" />
                 <span asp-validation-for="FechaTerm" class="text-danger"></span>
             </div>
             <div class="form-group col-4">
@@ -45,10 +47,7 @@
         <div class="form-group  col-4">
                 <label asp-for="IdInmueble" class="control-label"></label>
                 <select class="form-control"  name="IdInmueble" id = "selectInmuebles">
-                    @foreach (var item in (IList<Inmueble>)ViewBag.Inmuebles)
-                    {
-                        @:<option @(item.Id == Model?.IdInmueble ? "selected" : "") value="@item.Id">@item.Direccion </option>
-                    }
+                    
                 </select>
             </div>
             
@@ -62,20 +61,69 @@
     <a asp-action="Index">Volver al listado</a>
 </div>
 
-<script src="path/to/select2.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/select2/select2.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('#selectInquilinos').select2();
-});
-</script>
-script src="path/to/select2.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('#selectInmuebles"').select2();
-});
-</script>
+    
+    $(document).ready(function () {
+        $('#selectInquilinos').select2();
+        $('#selectInmuebles').select2();
+        var inmuebles = @Html.Raw(inmueblesJson);
+        var contratos = @Html.Raw(contratosJson);
 
+        console.log("Inmuebles:", inmuebles);
+        console.log("Contratos:", contratos);
 
+        function actualizarInmuebles() {
+            var fechaInicio = $('#fechaInicio').val();
+            var fechaTerm = $('#fechaTerm').val();
+
+            var fechaInicioDate = fechaInicio ? new Date(fechaInicio) : null;
+            var fechaTermDate = fechaTerm ? new Date(fechaTerm) : null;
+
+            var inmueblesFiltrados = inmuebles.filter(function (inmueble) {
+                // Filtrar por disponibilidad primero
+                if (inmueble.Disponible === 'NO') {
+                    return false;
+                }
+
+                if (fechaInicioDate && fechaTermDate) {
+                    return !contratos.some(function (contrato) {
+                        var fechaInicioOcupado = new Date(contrato.FechaInicio);
+                        var fechaTermOcupado = new Date(contrato.FechaTerm);
+
+                        return (
+                            contrato.IdInmueble === inmueble.Id &&
+                            ((fechaInicioDate >= fechaInicioOcupado && fechaInicioDate <= fechaTermOcupado) ||
+                            (fechaTermDate >= fechaInicioOcupado && fechaTermDate <= fechaTermOcupado) ||
+                            (fechaInicioDate <= fechaInicioOcupado && fechaTermDate >= fechaTermOcupado))
+                        );
+                    });
+                }
+
+                return true;
+            });
+
+            var $selectInmuebles = $('#selectInmuebles');
+            $selectInmuebles.empty();
+            if (inmueblesFiltrados.length > 0) {
+                inmueblesFiltrados.forEach(function (inmueble) {
+                    $selectInmuebles.append('<option value="' + inmueble.Id + '">' + inmueble.Id + ' - ' + inmueble.Direccion + '</option>');
+                });
+            } else {
+                $selectInmuebles.append('<option value="">No hay inmuebles disponibles</option>');
+            }
+        }
+
+        actualizarInmuebles();
+
+        $('#fechaInicio, #fechaTerm').on('change', function () {
+            actualizarInmuebles();
+        });
+
+        $('#selectInquilinos').select2();
+    });
+</script>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

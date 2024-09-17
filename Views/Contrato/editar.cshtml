@@ -77,6 +77,7 @@
         function actualizarInmuebles() {
             var fechaInicio = $('#fechaInicio').val();
             var fechaTerm = $('#fechaTerm').val();
+            var contratoId = '@Model?.Id'; // Obtiene el ID del contrato actual
 
             var fechaInicioDate = fechaInicio ? new Date(fechaInicio) : null;
             var fechaTermDate = fechaTerm ? new Date(fechaTerm) : null;
@@ -87,11 +88,20 @@
                     return false;
                 }
 
+                // Incluir el inmueble del contrato actual
+                var esInmuebleActual = contratos.some(function (contrato) {
+                    return contrato.Id === parseInt(contratoId) && contrato.IdInmueble === inmueble.Id;
+                });
+
+                if (esInmuebleActual) {
+                    return true; // Incluir el inmueble actual
+                }
+
+                // Filtrar por fechas de ocupación
                 if (fechaInicioDate && fechaTermDate) {
                     return !contratos.some(function (contrato) {
                         var fechaInicioOcupado = new Date(contrato.FechaInicio);
                         var fechaTermOcupado = new Date(contrato.FechaTerm);
-
                         return (
                             contrato.IdInmueble === inmueble.Id &&
                             ((fechaInicioDate >= fechaInicioOcupado && fechaInicioDate <= fechaTermOcupado) ||
@@ -110,6 +120,11 @@
                 inmueblesFiltrados.forEach(function (inmueble) {
                     $selectInmuebles.append('<option value="' + inmueble.Id + '">' + inmueble.Id + ' - ' + inmueble.Direccion + '</option>');
                 });
+
+                // Seleccionar el inmueble actual en el modo de edición
+                if (contratoId) {
+                    $selectInmuebles.val('@Model?.IdInmueble').change();
+                }
             } else {
                 $selectInmuebles.append('<option value="">No hay inmuebles disponibles</option>');
             }

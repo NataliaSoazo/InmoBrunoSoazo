@@ -260,6 +260,32 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+    public IActionResult EliminarAvatar(int id, Usuario usuario){
+        try
+        {
+             RepositorioUsuario ru = new RepositorioUsuario();
+        var usuarioExistente = ru.getUsuario(id);
+
+            if (usuarioExistente != null){
+                if(usuarioExistente.AvatarURL!=Path.Combine("/ImgSubidas","anonimo.jpg" )){
+                    eliminaArchivoAnterior(usuarioExistente);
+                    usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas","anonimo.jpg" );
+                    ru.EditarAvatar(usuarioExistente);
+                }
+            }
+            TempData["Mensaje"] = "El avatar ha sido eliminado";
+            return RedirectToAction(nameof(Index));
+            
+        }
+        catch (System.Exception)
+        {   
+            TempData["Mensaje"] = "Ocurrio un error al eliminar el usuario";
+            return RedirectToAction(nameof(Index));
+            throw;
+
+        }
+         
+    }
 
     public IActionResult Detalles(int id)
     {

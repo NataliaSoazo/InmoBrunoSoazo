@@ -7,10 +7,18 @@
 <hr />
 <div class="row">
     <div class="col-6 " id ="table">
+         <div class="col ">
+        <form asp-action="EliminarAvatar" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+               <div class="form-group p-3" >
+                <input type="submit" value="ELIMINAR AVATAR" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
         <form asp-action="Editar" enctype="multipart/form-data" method="post">
             <input type="hidden" name="id" value="@Model.Id" />
              <div class="form-group item-aligne.center">
-                <label asp-for="AvatarURL" class="control-label"></label><br />
+                <label asp-for="AvatarURL" class="control-label p-6"></label><br />
                 @if (!string.IsNullOrEmpty(Model.AvatarURL))
                 {
                     <img src="@Model.AvatarURL" width="200px" height="200px" id="configImg" />

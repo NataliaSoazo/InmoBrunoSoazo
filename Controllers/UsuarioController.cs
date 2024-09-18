@@ -37,6 +37,7 @@ public class UsuarioController : Controller
         this.environment = environment;
 
     }
+    [Authorize(Policy = "Administrador")]
     public IActionResult Index()
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
@@ -62,6 +63,7 @@ public class UsuarioController : Controller
             return View(lista);
         }
     }
+    [Authorize(Policy = "Administrador")]
     public IActionResult Crear()
     {
         RepositorioRol repoRol = new RepositorioRol();
@@ -69,6 +71,7 @@ public class UsuarioController : Controller
         return View();
     }
 
+    [Authorize(Policy = "Administrador")]
     [HttpPost]
     public IActionResult Guardar(Usuario usuario)
     {
@@ -87,8 +90,9 @@ public class UsuarioController : Controller
             {
                 GuardarAvatar(usuario); // Método separado para manejo de archivos
             }
-            else{
-                 usuario.AvatarURL = Path.Combine("/ImgSubidas","anonimo.jpg" );
+            else
+            {
+                usuario.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
                 repositorio.ModificarUsuario(usuario);
             }
             return RedirectToAction(nameof(Index));
@@ -115,7 +119,7 @@ public class UsuarioController : Controller
     private void GuardarAvatar(Usuario usuario)
     {
         try
-        {   
+        {
             string wwwPath = environment.WebRootPath;
             string path = Path.Combine(wwwPath, "ImgSubidas");
             // Crear el directorio si no existe
@@ -125,10 +129,10 @@ public class UsuarioController : Controller
 
             }
             // Crear un nombre de archivo único con el ID del usuario
-             Random random = new Random();
+            Random random = new Random();
             // Generar un número entero aleatorio entre 0 (inclusive) y 10 (exclusivo)
-             int aleacion = random.Next(10);  
-            string fileName = aleacion + "av_"+ usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
+            int aleacion = random.Next(10);
+            string fileName = aleacion + "av_" + usuario.Id + Path.GetExtension(usuario.AvatarFile.FileName);
             string fullPath = Path.Combine(path, fileName);
             // Guardar la imagen en el servidor
             using (FileStream stream = new FileStream(fullPath, FileMode.Create))
@@ -136,7 +140,7 @@ public class UsuarioController : Controller
                 usuario.AvatarFile.CopyTo(stream);
             }
             eliminaArchivoAnterior(usuario);
-          
+
             usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
             // Actualizar el usuario en la base de datos
             RepositorioUsuario repositorio = new RepositorioUsuario();
@@ -147,34 +151,52 @@ public class UsuarioController : Controller
             TempData["Error"] = "Ocurrio un error al guardar el avatar";
         }
     }
-    public void eliminaArchivoAnterior(Usuario usuario){
-      if (usuario.AvatarURL != null && !usuario.AvatarURL.EndsWith("anonimo.jpg"))
+    public void eliminaArchivoAnterior(Usuario usuario)
     {
-        string fullPath = Path.Combine(environment.WebRootPath, usuario.AvatarURL.TrimStart('/'));
-        if (System.IO.File.Exists(fullPath))
+        if (usuario.AvatarURL != null && !usuario.AvatarURL.EndsWith("anonimo.jpg"))
         {
-            System.IO.File.Delete(fullPath);
+            string fullPath = Path.Combine(environment.WebRootPath, usuario.AvatarURL.TrimStart('/'));
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
     }
-    }
 
-
+    [Authorize]
     [HttpGet]
     public IActionResult Editar(int id)
     {
-        try{
-        if (id > 0)
+        try
         {
-            RepositorioRol repoRol = new RepositorioRol();
-            ViewBag.Roles = repoRol.ObtenerRoles();
-            RepositorioUsuario repositorio = new RepositorioUsuario();
-            var usuario = repositorio.getUsuario(id);
-            return View(usuario);
-        }
-        else
-        {
-            return View();
-        }
+            if (id > 0)
+            {
+                // Obtener el usuario actual logueado
+                RepositorioUsuario ru = new RepositorioUsuario();
+                var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+                var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+                // Verificar si el usuario actual puede editar al usuario con el ID dado
+                if (userRole == "ADMINISTRADOR" || (usuarioActual != null && usuarioActual.Id == id))
+                {
+                    RepositorioRol repoRol = new RepositorioRol();
+                    ViewBag.Roles = repoRol.ObtenerRoles();
+
+                    RepositorioUsuario repositorio = new RepositorioUsuario();
+                    var usuario = repositorio.getUsuario(id);
+                    return View(usuario);
+                }
+                else
+                {
+                    // Si no tiene permisos para editar, redirigir con un mensaje de error
+                    TempData["Error"] = "No tiene permisos para editar este usuario.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            else
+            {
+                return View();
+            }
         }
         catch (Exception ex)
         {
@@ -182,6 +204,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+    [Authorize]
     [HttpPost]
     public IActionResult Editar(int id, Usuario u)
     {
@@ -193,20 +216,72 @@ public class UsuarioController : Controller
             }
 
             RepositorioUsuario ru = new RepositorioUsuario();
-            var usuarioExistente = ru.getUsuario(id);
+            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
-            if (usuarioExistente != null)
+            // Verificar si el usuario actual tiene permisos para editar
+            if (userRole == "ADMINISTRADOR" || (usuarioActual != null && usuarioActual.Id == id))
             {
-                usuarioExistente.Nombre = u.Nombre.ToUpper();
-                usuarioExistente.Apellido = u.Apellido.ToUpper();
-                usuarioExistente.Correo = u.Correo;
-                if(u.AvatarFile!=null){
-                    usuarioExistente.AvatarFile = u.AvatarFile;
-                    GuardarAvatar(usuarioExistente);
+                var usuarioExistente = ru.getUsuario(id);
+
+                if (usuarioExistente != null)
+                {
+                    usuarioExistente.Nombre = u.Nombre.ToUpper();
+                    usuarioExistente.Apellido = u.Apellido.ToUpper();
+                    usuarioExistente.Correo = u.Correo;
+                    if (u.AvatarFile != null)
+                    {
+                        usuarioExistente.AvatarFile = u.AvatarFile;
+                        GuardarAvatar(usuarioExistente);
+                    }
+                    ru.EditarDatos(usuarioExistente);
+                    TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
+                    return RedirectToAction(nameof(Index));
                 }
-                ru.EditarDatos(usuarioExistente);
-                TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
+                else
+                {
+                    TempData["Error"] = "Usuario no encontrado";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            else
+            {
+                TempData["Error"] = "No tiene permisos para editar este usuario.";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al actualizar los datos del usuario";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+    [Authorize]
+    [HttpPost]
+    public IActionResult CambiarContraseña(int id, Usuario u)
+    {
+        try
+        {
+            RepositorioUsuario ru = new RepositorioUsuario();
+            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+            var user = ru.getUsuario(id);
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+
+            if (user != null)
+            {
+                // Verificar si el usuario actual es el mismo que va a cambiar la contraseña o es un administrador
+                if (usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
+                {
+                    user.Clave = HashPassword(u.Clave);
+                    ru.EditarClave(user);
+                    TempData["Mensaje"] = "Clave editada correctamente";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    TempData["Error"] = "No tiene permisos para cambiar la contraseña de este usuario.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
             else
             {
@@ -220,31 +295,7 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-     [HttpPost]
-    public IActionResult CambiarContraseña(int id, Usuario u)
-    {
-    try
-    {
-               RepositorioUsuario ru = new RepositorioUsuario();
-                var user = ru.getUsuario(id);
-               if(user!= null){
-                user.Clave = HashPassword(u.Clave);
-                ru.EditarClave(user);
-                TempData["Mensaje"] = "Clave editada correctamente";
-                return RedirectToAction(nameof(Index));
-               }else{
-                 TempData["Error"] = "Usuario no encontrado";
-                return RedirectToAction(nameof(Index));
-                        
-            }
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = "Ocurrio un error al actualizar los datos del usuario";
-            return RedirectToAction(nameof(Index));
-        }
-    }
-
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -260,38 +311,63 @@ public class UsuarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-    public IActionResult EliminarAvatar(int id, Usuario usuario){
+    [Authorize]
+    public IActionResult EliminarAvatar(int id, Usuario usuario)
+    {
         try
         {
-             RepositorioUsuario ru = new RepositorioUsuario();
-        var usuarioExistente = ru.getUsuario(id);
+            RepositorioUsuario ru = new RepositorioUsuario();
+            var usuarioActual = ru.ObtenerPorEmail(User.Identity.Name);
+            var usuarioExistente = ru.getUsuario(id);
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
-            if (usuarioExistente != null){
-                if(usuarioExistente.AvatarURL!=Path.Combine("/ImgSubidas","anonimo.jpg" )){
-                    eliminaArchivoAnterior(usuarioExistente);
-                    usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas","anonimo.jpg" );
-                    ru.EditarAvatar(usuarioExistente);
+            if (usuarioExistente != null)
+            {
+                // Verificar si el usuario actual es el mismo que va a eliminar el avatar o es un administrador
+                if (usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
+                {
+                    if (usuarioExistente.AvatarURL != Path.Combine("/ImgSubidas", "anonimo.jpg"))
+                    {
+                        eliminaArchivoAnterior(usuarioExistente);
+                        usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
+                        ru.EditarAvatar(usuarioExistente);
+                    }
+                    TempData["Mensaje"] = "El avatar ha sido eliminado";
+                }
+                else
+                {
+                    TempData["Error"] = "No tiene permisos para eliminar el avatar de este usuario.";
                 }
             }
-            TempData["Mensaje"] = "El avatar ha sido eliminado";
+            else
+            {
+                TempData["Error"] = "Usuario no encontrado";
+            }
+
             return RedirectToAction(nameof(Index));
-            
         }
         catch (System.Exception)
-        {   
-            TempData["Mensaje"] = "Ocurrio un error al eliminar el usuario";
+        {
+            TempData["Error"] = "Ocurrió un error al eliminar el avatar";
             return RedirectToAction(nameof(Index));
-            throw;
-
         }
-         
     }
-
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
-        var usuario = repositorio.getUsuario(id);
-        return View(usuario);
+        var usuarioActual = repositorio.ObtenerPorEmail(User.Identity.Name);
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        if (usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
+        {
+            var usuario = repositorio.getUsuario(id);
+            return View(usuario);
+        }
+        else
+        {
+            TempData["Error"] = "No tiene permisos para ver detalles de este usuario.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
@@ -316,7 +392,7 @@ public class UsuarioController : Controller
                     {
                     new Claim(ClaimTypes.Name, e.Correo),
                     new Claim("FullName", e.Nombre + " " + e.Apellido),
-                    new Claim(ClaimTypes.Role, e.Datos.rol),
+                    new Claim("Rol", e.Datos.rol.ToString()),
                     };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -326,6 +402,7 @@ public class UsuarioController : Controller
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity));
             TempData.Remove("returnUrl");
+            ViewBag.UserRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
             return RedirectToAction("Index", "Home");
         }
         TempData["returnUrl"] = returnUrl;

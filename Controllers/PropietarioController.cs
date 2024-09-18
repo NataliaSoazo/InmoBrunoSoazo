@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PROYECTO_BRUNO_SOAZO;
 using PROYECTO_BRUNO_SOAZO.Controllers;
@@ -17,14 +18,18 @@ public class PropietarioController : Controller
 
         _logger = logger;
     }
-
+    
+    [Authorize]
     public IActionResult Index()
     {
         RepositorioPropietario rp = new RepositorioPropietario();
         IList<Propietario> lista = new List<Propietario>();
         try
         {
-             lista = rp.GetPropietarios();
+            lista = rp.GetPropietarios();
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+            ViewBag.UserRole = userRole;
+            ViewBag.Mensaje = "UserRole: " + userRole;
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
@@ -43,7 +48,7 @@ public class PropietarioController : Controller
             return View(lista);
         }
     }
-
+    [Authorize]
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -57,7 +62,7 @@ public class PropietarioController : Controller
             return View();
         }
     }
-
+    [Authorize]
     public IActionResult Guardar(Propietario propietario)
     {
         try
@@ -89,7 +94,7 @@ public class PropietarioController : Controller
         }
 
     }
-
+    [Authorize(Policy ="Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -105,7 +110,7 @@ public class PropietarioController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioPropietario rp = new RepositorioPropietario();
@@ -126,6 +131,7 @@ public class PropietarioController : Controller
         }
     }
     //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
+    [Authorize]//Arreglar buscador
     public IActionResult Buscar(string q)
     {
         try

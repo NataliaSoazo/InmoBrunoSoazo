@@ -12,14 +12,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Home/Login"; // Redirigir para login
         options.LogoutPath = "/Home/Logout"; // Redirigir para logout
-        options.AccessDeniedPath = "/Home/AccesoDenegado"; // Redirigir para acceso denegado
+        options.AccessDeniedPath = "/Home/Index"; // Redirigir para acceso denegado
     });
 
 // Autorización con política de administrador
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Administrador", policy => 
-        policy.RequireClaim("Rol", "Administrador"));
+        policy.RequireClaim("Rol", "ADMINISTRADOR"));
 });
 
 var app = builder.Build();
@@ -29,7 +29,7 @@ app.UseHttpsRedirection();
 
 // Servir archivos estáticos
 app.UseStaticFiles();
-
+app.UseRouting();
 // Middleware de autenticación y autorización
 app.UseAuthentication();
 app.UseAuthorization();
@@ -38,5 +38,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Loguin}/{id?}");
+
+app.MapControllerRoute(
+    name: "usuarios",
+    pattern: "usuarios/{action=Index}/{id?}",
+    defaults: new { controller = "Usuario" });
 
 app.Run();

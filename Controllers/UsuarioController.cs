@@ -115,18 +115,14 @@ public class UsuarioController : Controller
     private void GuardarAvatar(Usuario usuario)
     {
         try
-        {   if(usuario.AvatarURL!= null && usuario.AvatarURL!=Path.Combine("/ImgSubidas","anonimo.jpg"))
-            {
-            var uri = new Uri(usuario.AvatarURL);
-            var rutaVieja = Path.GetFileName(uri.LocalPath);
-            System.IO.File.Delete(rutaVieja);
-            }
+        {   
             string wwwPath = environment.WebRootPath;
             string path = Path.Combine(wwwPath, "ImgSubidas");
             // Crear el directorio si no existe
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
+
             }
             // Crear un nombre de archivo único con el ID del usuario
              Random random = new Random();
@@ -139,7 +135,8 @@ public class UsuarioController : Controller
             {
                 usuario.AvatarFile.CopyTo(stream);
             }
-            // Guardar la ruta del AvatarURL en el modelo de usuario
+            eliminaArchivoAnterior(usuario);
+          
             usuario.AvatarURL = Path.Combine("/ImgSubidas", fileName);
             // Actualizar el usuario en la base de datos
             RepositorioUsuario repositorio = new RepositorioUsuario();
@@ -150,6 +147,17 @@ public class UsuarioController : Controller
             TempData["Error"] = "Ocurrio un error al guardar el avatar";
         }
     }
+    public void eliminaArchivoAnterior(Usuario usuario){
+      if (usuario.AvatarURL != null && !usuario.AvatarURL.EndsWith("anonimo.jpg"))
+    {
+        string fullPath = Path.Combine(environment.WebRootPath, usuario.AvatarURL.TrimStart('/'));
+        if (System.IO.File.Exists(fullPath))
+        {
+            System.IO.File.Delete(fullPath);
+        }
+    }
+    }
+
 
     [HttpGet]
     public IActionResult Editar(int id)

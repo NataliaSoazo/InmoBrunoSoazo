@@ -418,4 +418,15 @@ public class UsuarioController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    [Authorize]
+        public ActionResult Perfil()
+
+        {   RepositorioUsuario ru = new RepositorioUsuario();
+            ViewData["Title"] = "Mi perfil";
+            var u = ru.ObtenerPorEmail(User.Identity.Name);
+           RepositorioRol repoRol = new RepositorioRol();
+             ViewBag.Roles = repoRol.ObtenerRoles();
+            return View("Editar", u);
+        }
+
 }

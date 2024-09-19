@@ -70,13 +70,13 @@
                     @Html.DisplayFor(model => item.IdContrato)
                 </th>
                 <td>
-                    <a asp-action="Detalles" asp-route-id=@item.Id><i class="fa fa-eye " style="font-size:25px;"
+                    <a asp-action="Detalles" asp-route-id=@item.Id title="Ver Detalle"><i class="fa fa-eye " style="font-size:25px;"
                             id="detalles"></i></a>
-                    <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil " style="font-size:25px;"
+                    <a asp-action="Editar" asp-route-id=@item.Id title="Editar"><i class="fa fa-pencil " style="font-size:25px;"
                             id="edi"></i></a>
                     @if (ViewBag.UserRole == "ADMINISTRADOR")
                     {
-                        <a href="#" onclick="eliminar('@item.Id')">
+                        <a href="#" onclick="eliminar('@item.Id')" title="Anular">
                             <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
                         </a>
                     }
@@ -86,7 +86,7 @@
     </tbody>
 </table>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Contrato">
+<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Pago">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -96,8 +96,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input type="hidden" name="Id" value="" id="Contrato_eliminar_id">
-                <p><span id="Contrato_eliminar_id"></span></p>
+                <input type="hidden" name="Id" value="" id="Pago_eliminar_id">
+                <p><span id="Pago_eliminar_id"></span></p>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-danger">Anular</button>
@@ -110,9 +110,9 @@
 @section Scripts {
     <script>
         function eliminar(id) {
-            document.querySelector("#Contrato_eliminar_id").value = id;
-            document.querySelector("#Contrato_eliminar_id").innerHTML = id;
-            $("#modal_eliminar_Contrato").modal("show");
+            document.querySelector("#Pago_eliminar_id").value = id;
+            document.querySelector("#Pago_eliminar_id").innerHTML = id;
+            $("#modal_eliminar_Pago").modal("show");
         }
     </script>
 }

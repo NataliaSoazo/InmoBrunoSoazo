@@ -374,7 +374,6 @@ public class UsuarioController : Controller
     public async Task<IActionResult> Loguin(Log login)
     {
 
-
         var returnUrl = String.IsNullOrEmpty(TempData["returnUrl"] as string) ? "/Home" : TempData["returnUrl"].ToString();
         if (ModelState.IsValid)
         {
@@ -383,7 +382,7 @@ public class UsuarioController : Controller
             var e = repositorio.ObtenerPorEmail(login.Usuario);
             if (e == null || e.Clave != comprobarHash)
             {
-                ModelState.AddModelError("", "El email o la clave no son correctos");
+                ViewBag.Error = "Usuario o clave incorrectos";
                 TempData["returnUrl"] = returnUrl;
                 return RedirectToAction("Loguin", "Home");
             }

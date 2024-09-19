@@ -344,7 +344,7 @@ public class UsuarioController : Controller
                 TempData["Error"] = "Usuario no encontrado";
             }
 
-            return View("Editar", id);
+            return RedirectToAction(nameof(Index));
         }
         catch (System.Exception)
         {

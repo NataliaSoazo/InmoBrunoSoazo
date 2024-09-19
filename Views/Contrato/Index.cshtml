@@ -73,7 +73,7 @@
     </tbody>
 </table>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Pago">
+<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Contrato">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -83,11 +83,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <input type="hidden" name="Id" value="" id ="Pago_eliminar_id">
-        <p><span id="Pago_eliminar_id"></span></p>
+        <input type="hidden" name="Id" value="" id="Contrato_eliminar_id">
+        <p><span id="Contrato_eliminar_nombre"></span></p>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-danger" >Eliminar</button>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
       </div>
     </div>
@@ -100,8 +100,8 @@
     <script>
         function eliminar(id){
             document.querySelector("#Contrato_eliminar_id").value = id;
-            document.querySelector("#Contrato_eliminar_id").innerHTML = id;
-            $("#modal_eliminar_Pago").modal("show");
+            document.querySelector("#Contrato_eliminar_nombre").innerHTML = id;
+            $("#modal_eliminar_Contrato").modal("show");
         }
     </script>
 }

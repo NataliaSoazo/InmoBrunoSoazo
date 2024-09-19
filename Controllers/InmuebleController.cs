@@ -43,26 +43,13 @@ public class InmuebleController : Controller
         }
     }
     [Authorize]
-    public IActionResult VerDisp()
+    public IActionResult DisponiblesPorFechas(DateTime fechaInicio, DateTime fechaFin)
     {
-        RepositorioInmueble ri = new RepositorioInmueble();
-        IList<Inmueble> lista = new List<Inmueble>();
-        try
-        {
-            // Obtener la lista completa de inmuebles
-            lista = ri.ObtenerTodos();
-
-            // Filtrar solo los disponibles
-            var disponibles = lista.Where(i => i.Disponible == "SI").ToList();
-
-            // Retornar la vista "Index" con los inmuebles disponibles
-            return View("Index", disponibles);
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = "Ocurrió un error al obtener los inmuebles disponibles.";
-            return RedirectToAction("Index");
-        }
+        RepositorioContrato rc = new RepositorioContrato();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
+        var inmueblesDisponibles = rc.obtenerInmDisp(fechaInicio, fechaFin);
+        return View("Index", inmueblesDisponibles);
     }
     [Authorize]
     public IActionResult Editar(int id)
@@ -119,7 +106,7 @@ public class InmuebleController : Controller
 
         }
     }
-    [Authorize(Policy ="Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -142,10 +129,12 @@ public class InmuebleController : Controller
         var i = rp.GetInmueble(id);
         return View(i);
     }
-    
+
     [Authorize]
     public IActionResult BuscarPropietarios(string buscar)
     {
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         RepositorioPropietario rp = new RepositorioPropietario();
         RepositorioInmueble ri = new RepositorioInmueble();
 

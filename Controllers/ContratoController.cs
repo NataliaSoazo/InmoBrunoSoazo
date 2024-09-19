@@ -21,6 +21,7 @@ public class ContratoController : Controller
         IList<Contrato> lista = new List<Contrato>();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
+        
         try
         {
             lista = rc.GetContratos();

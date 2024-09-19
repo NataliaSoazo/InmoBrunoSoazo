@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PROYECTO_BRUNO_SOAZO;
 using PROYECTO_BRUNO_SOAZO.Controllers;
@@ -17,11 +18,13 @@ public class InquilinoController : Controller
 
         _logger = logger;
     }
-
+    [Authorize]
     public IActionResult Index()
     {
         RepositorioInquilino rp = new RepositorioInquilino();
         IList<Inquilino> lista = new List<Inquilino>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.GetInquilinos();
@@ -39,7 +42,7 @@ public class InquilinoController : Controller
             return View(lista);
         }
     }
-
+    [Authorize]
     public IActionResult Editar(int id)
     {
         if (id > 0)
@@ -53,7 +56,7 @@ public class InquilinoController : Controller
             return View();
         }
     }
-
+    [Authorize]
     public IActionResult Guardar(Inquilino inquilino)
     {
         try
@@ -84,7 +87,7 @@ public class InquilinoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+    [Authorize(Policy ="Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -100,6 +103,8 @@ public class InquilinoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioInquilino rp = new RepositorioInquilino();
@@ -120,6 +125,7 @@ public class InquilinoController : Controller
         }
     }
     //  [Route("[controller]/Buscar/{q}", Name = "Buscar")]
+    [Authorize]
     public IActionResult Buscar(string q)
     {
         try

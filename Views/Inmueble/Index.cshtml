@@ -63,8 +63,12 @@
                             id="detalles"></i></a>
                     <a asp-action="Editar" asp-route-id=@item.Id><i class="fa fa-pencil " style="font-size:25px;"
                             id="edi"></i></a>
-                    <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')"><i class="fa fa-trash "
-                            style="font-size:25px;" id="eli"></i></a>
+                    @if (ViewBag.UserRole == "ADMINISTRADOR")
+                    {
+                        <a href="#" onclick="eliminar('@item.Id', '@item.Direccion')">
+                            <i class="fa fa-trash" style="font-size:25px;" id="eli"></i>
+                        </a>
+                    }
                     <a asp-controller="Contrato" asp-action="ListarContratosInmueble" asp-route-id=@item.Id><i class="fa fa-bars" style="font-size:25px;"
                             id="lcontratos"></i></a>
                 </td>

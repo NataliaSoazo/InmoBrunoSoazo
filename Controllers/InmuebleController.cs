@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PROYECTO_BRUNO_SOAZO.Models;
 using ZstdSharp.Unsafe;
@@ -13,11 +14,13 @@ public class InmuebleController : Controller
     {
         _logger = logger;
     }
-
+    [Authorize]
     public IActionResult Index()
     {
         RepositorioInmueble ri = new RepositorioInmueble();
         IList<Inmueble> lista = new List<Inmueble>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = ri.ObtenerTodos();
@@ -39,7 +42,7 @@ public class InmuebleController : Controller
             return View(lista);
         }
     }
-
+    [Authorize]
     public IActionResult VerDisp()
     {
         RepositorioInmueble ri = new RepositorioInmueble();
@@ -61,6 +64,7 @@ public class InmuebleController : Controller
             return RedirectToAction("Index");
         }
     }
+    [Authorize]
     public IActionResult Editar(int id)
 
     {
@@ -81,7 +85,7 @@ public class InmuebleController : Controller
             return View();
         }
     }
-
+    [Authorize]
     public IActionResult Guardar(Inmueble inmueble)
     {
         try
@@ -115,6 +119,7 @@ public class InmuebleController : Controller
 
         }
     }
+    [Authorize(Policy ="Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -130,14 +135,15 @@ public class InmuebleController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioInmueble rp = new RepositorioInmueble();
         var i = rp.GetInmueble(id);
         return View(i);
     }
-
+    
+    [Authorize]
     public IActionResult BuscarPropietarios(string buscar)
     {
         RepositorioPropietario rp = new RepositorioPropietario();

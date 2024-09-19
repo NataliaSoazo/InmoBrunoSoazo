@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PROYECTO_BRUNO_SOAZO.Models;
 
@@ -13,10 +14,13 @@ public class PagoController : Controller
     {
         _logger = logger;
     }
+    [Authorize]
     public IActionResult Index()
     {
         RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.GetPagos();
@@ -38,7 +42,7 @@ public class PagoController : Controller
             return View(lista);
         }
     }
-
+    [Authorize]
     public IActionResult Editar(int? id, int? idContrato)
     {
         RepositorioContrato repoContrato = new RepositorioContrato();
@@ -59,7 +63,7 @@ public class PagoController : Controller
 
         return View(pago);
     }
-
+    [Authorize]
     public IActionResult Guardar(Pago pago, int? idContrato)
     {
         if (idContrato.HasValue)
@@ -88,7 +92,7 @@ public class PagoController : Controller
 
         }
     }
-
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -104,14 +108,14 @@ public class PagoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+    [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioPago rp = new RepositorioPago();
         var p = rp.GetPago(id);
         return View(p);
     }
-
+    [Authorize]
     public IActionResult PagosContrato(int id)
     {
         RepositorioPago rp = new RepositorioPago();

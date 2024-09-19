@@ -29,7 +29,7 @@ public class PropietarioController : Controller
             lista = rp.GetPropietarios();
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
             ViewBag.UserRole = userRole;
-            ViewBag.Mensaje = "UserRole: " + userRole;
+            
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];

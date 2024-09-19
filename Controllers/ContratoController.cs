@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PROYECTO_BRUNO_SOAZO.Models;
 
@@ -13,11 +14,13 @@ public class ContratoController : Controller
     {
         _logger = logger;
     }
-
+    [Authorize]
     public IActionResult Index()
     {
         RepositorioContrato rc = new RepositorioContrato();
         IList<Contrato> lista = new List<Contrato>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rc.GetContratos();
@@ -39,6 +42,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
+     [Authorize]
     public IActionResult Editar(int id)
 
     {
@@ -64,7 +68,7 @@ public class ContratoController : Controller
             return View();
         }
     }
-
+     [Authorize]
     public IActionResult Guardar(Contrato contrato)
     {
         try
@@ -94,6 +98,7 @@ public class ContratoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+     [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
         try
@@ -109,14 +114,14 @@ public class ContratoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-
+     [Authorize]
     public IActionResult Detalles(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
         var i = rc.GetContrato(id);
         return View(i);
     }
-
+     [Authorize]
     public IActionResult VerVigentes()
     {
         RepositorioContrato rc = new RepositorioContrato();
@@ -133,7 +138,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
-
+     [Authorize]
     public IActionResult ListarContratosInmueble(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
@@ -150,7 +155,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
-
+     [Authorize]
     public IActionResult Renovar(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();

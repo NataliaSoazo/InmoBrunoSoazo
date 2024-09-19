@@ -1,6 +1,4 @@
 @model IEnumerable<Inquilino>
-
-
 @{
     ViewData["Title"] = "Index";
 }
@@ -72,29 +70,34 @@
     </tbody>
 </table>
 
-<form class="modal" tabindex="-1" asp-action="Eliminar" id="modal_eliminar_Inquilino">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="Id" value="" id ="Inquilino_eliminar_id">
-        <p><span id="Inquilino_eliminar_nombre"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-danger" >Eliminar</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
-      </div>
+<form method="post" asp-action="Eliminar" id="form_eliminar">
+    <div class="modal fade" id="modal_eliminar_Inquilino" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">DESEAS ELIMINAR A:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" value="" id="Inquilino_eliminar_id">
+                    <p><span id="Inquilino_eliminar_nombre"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </form>
-@section Scripts{
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function eliminar(id, nombre){
+        function eliminar(id, nombre) {
             document.querySelector("#Inquilino_eliminar_id").value = id;
             document.querySelector("#Inquilino_eliminar_nombre").innerHTML = nombre;
             $("#modal_eliminar_Inquilino").modal("show");

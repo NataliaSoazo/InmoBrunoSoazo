@@ -93,18 +93,18 @@ public class PagoController : Controller
         }
     }
     [Authorize(Policy = "Administrador")]
-    public IActionResult Eliminar(int id)
+    public IActionResult Eliminar(int id) //Es un anulado logico
     {
         try
         {
             RepositorioPago rp = new RepositorioPago();
             rp.EliminarPago(id);
-            TempData["Mensaje"] = "El pago ha sido eliminado correctamente.";
+            TempData["Mensaje"] = "El pago ha sido anulado correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch
         {
-            TempData["Error"] = "No se pudo completar la eliminación.";
+            TempData["Error"] = "No se pudo completar la operación.";
             return RedirectToAction(nameof(Index));
         }
     }

@@ -58,7 +58,7 @@ public class RepositorioPago
                 command.Parameters.AddWithValue($"@{nameof(Pago.Fecha)}", pago.Fecha);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Referencia)}", pago.Referencia);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);
-                command.Parameters.AddWithValue($"@{nameof(Pago.Anulado)}", pago.Anulado);
+                command.Parameters.AddWithValue($"@{nameof(Pago.Anulado)}", "NO");
                 command.Parameters.AddWithValue($"@{nameof(Pago.IdContrato)}", pago.IdContrato);
 
                 connection.Open();
@@ -112,7 +112,6 @@ public class RepositorioPago
                             {nameof(Pago.Fecha)} = @{nameof(Pago.Fecha)},
                             {nameof(Pago.Referencia)} = @{nameof(Pago.Referencia)},
                             {nameof(Pago.Importe)} = @{nameof(Pago.Importe)},
-                            {nameof(Pago.Anulado)} = @{nameof(Pago.Anulado)},
                             {nameof(Pago.IdContrato)} = @{nameof(Pago.IdContrato)}
                         WHERE {nameof(Pago.Id)} = @{nameof(Pago.Id)};";
 
@@ -122,7 +121,6 @@ public class RepositorioPago
                 command.Parameters.AddWithValue($"@{nameof(Pago.Fecha)}", pago.Fecha);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Referencia)}", pago.Referencia);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);
-                command.Parameters.AddWithValue($"@{nameof(Pago.Anulado)}", pago.Anulado);
                 command.Parameters.AddWithValue($"@{nameof(Pago.IdContrato)}", pago.IdContrato);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Id)}", pago.Id);
 
@@ -135,11 +133,11 @@ public class RepositorioPago
     }
 
 
-    public int EliminarPago(int id)
+    public int EliminarPago(int id) //Es un anulado lógico
     {
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"DELETE from pagos WHERE {nameof(Pago.Id)} = @{nameof(Pago.Id)}";
+            var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = 'SI' WHERE {nameof(Pago.Id)} = @{nameof(Pago.Id)};";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Pago.Id)}", id);

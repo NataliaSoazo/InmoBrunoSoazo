@@ -10,10 +10,10 @@
 <p>
     <a asp-action="Editar"method = "post">CREAR NUEVO INQUILINO</a>
 </p>
-<form asp-action="Index">
+<form asp-action="BuscarInquilino" method="get">
     <p>
-        Buscar: <input type="text" name="buscar" class="form-text" />
-        <input type="submit" value="buscar" class="btn btn-dark" >
+        Buscar inquilino: <input type="text" name="buscar" class="form-text" />
+        <input type="submit" value="Buscar" class="btn btn-dark" />
     </p>
 </form>
 <table class="table" id="table">

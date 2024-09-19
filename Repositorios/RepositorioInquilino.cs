@@ -165,12 +165,17 @@ public class RepositorioInquilino
     public IList<Inquilino> BuscarPorNombre(string nombre)
     {
         var res = new List<Inquilino>();
-        nombre = "%" + nombre + "%";
+        nombre = "%" + nombre + "%"; // Usar comodines para la búsqueda parcial
 
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"SELECT {nameof(Inquilino.Id)},{nameof(Inquilino.Nombre)},{nameof(Inquilino.Apellido)},{nameof(Inquilino.Dni)},{nameof(Inquilino.Email)},{nameof(Inquilino.Telefono)},{nameof(Inquilino.Domicilio)},{nameof(Inquilino.Ciudad)} 
-                      FROM inquilinos WHERE {nameof(Inquilino.Nombre)} LIKE @{nameof(Inquilino.Nombre)} OR {nameof(Inquilino.Apellido)} LIKE @{nameof(Inquilino.Nombre)}";
+            var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)}, {nameof(Inquilino.Dni)}, {nameof(Inquilino.Email)}, {nameof(Inquilino.Telefono)}, {nameof(Inquilino.Domicilio)}, {nameof(Inquilino.Ciudad)} 
+                    FROM inquilinos 
+                    WHERE CONCAT({nameof(Inquilino.Nombre)}, ' ', {nameof(Inquilino.Apellido)}) LIKE @nombre
+                    OR CONCAT({nameof(Inquilino.Apellido)}, ' ', {nameof(Inquilino.Nombre)}) LIKE @nombre
+                    OR {nameof(Inquilino.Nombre)} LIKE @nombre 
+                    OR {nameof(Inquilino.Apellido)} LIKE @nombre 
+                    OR {nameof(Inquilino.Dni)} LIKE @nombre";
 
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -178,22 +183,23 @@ public class RepositorioInquilino
                 command.CommandType = CommandType.Text;
                 connection.Open();
 
-                var reader = command.ExecuteReader();
-
-                while (reader.Read())
+                using (var reader = command.ExecuteReader())
                 {
-                    var p = new Inquilino
+                    while (reader.Read())
                     {
-                        Id = reader.GetInt32(reader.GetOrdinal(nameof(Inquilino.Id))),
-                        Nombre = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Nombre))),
-                        Apellido = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Apellido))),
-                        Dni = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Dni))),
-                        Telefono = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Telefono))),
-                        Email = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Email))),
-
-                    };
-                    res.Add(p);
-
+                        var p = new Inquilino
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal(nameof(Inquilino.Id))),
+                            Nombre = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Nombre))),
+                            Apellido = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Apellido))),
+                            Dni = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Dni))),
+                            Telefono = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Telefono))),
+                            Email = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Email))),
+                            Domicilio = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Domicilio))),
+                            Ciudad = reader.GetString(reader.GetOrdinal(nameof(Inquilino.Ciudad)))
+                        };
+                        res.Add(p);
+                    }
                 }
             }
         }

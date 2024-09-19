@@ -175,17 +175,22 @@ public class RepositorioPropietario
     public IList<Propietario> BuscarPorNombre(string buscar)
     {
         var res = new List<Propietario>();
-        buscar = "%" + buscar + "%"; 
+        if (string.IsNullOrWhiteSpace(buscar))
+        {
+            return res; 
+        }
+        buscar = "%" + buscar + "%";
+
 
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            // Concatenamos nombre y apellido en la consulta SQL
             var sql = @$"SELECT {nameof(Propietario.Id)}, {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)}, {nameof(Propietario.Dni)}, {nameof(Propietario.Email)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Domicilio)}, {nameof(Propietario.Ciudad)} 
                     FROM propietarios
                     WHERE CONCAT({nameof(Propietario.Nombre)}, ' ', {nameof(Propietario.Apellido)}) LIKE @buscar
                     OR CONCAT({nameof(Propietario.Apellido)}, ' ', {nameof(Propietario.Nombre)}) LIKE @buscar
                     OR {nameof(Propietario.Nombre)} LIKE @buscar
-                    OR {nameof(Propietario.Apellido)} LIKE @buscar";
+                    OR {nameof(Propietario.Apellido)} LIKE @buscar
+                    OR {nameof(Propietario.Dni)} LIKE @buscar";
 
             using (var command = new MySqlCommand(sql, connection))
             {

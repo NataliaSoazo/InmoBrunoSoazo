@@ -126,17 +126,18 @@ public class InquilinoController : Controller
     }
     //  [Route("[controller]/Buscar/{q}", Name = "Buscar")]
     [Authorize]
-    public IActionResult Buscar(string q)
+    public IActionResult BuscarInquilino(string buscar)
     {
         try
         {
             RepositorioInquilino rp = new RepositorioInquilino();
-            var res = rp.BuscarPorNombre(q);
-            return Json(new { Datos = res });
+            IList<Inquilino> inquilino = rp.BuscarPorNombre(buscar);
+            return View("Index", inquilino);
         }
         catch (Exception ex)
         {
-            return Json(new { Error = ex.Message });
+            TempData["Error"] = "Ocurrio un error al buscar el inquilino";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -131,18 +131,19 @@ public class PropietarioController : Controller
         }
     }
     //[Route("[controller]/Buscar/{q}", Name = "Buscar")]
-    [Authorize]//Arreglar buscador
-    public IActionResult Buscar(string q)
+    [Authorize]
+    public IActionResult BuscarPropietario(string buscar)
     {
         try
         {
             RepositorioPropietario rp = new RepositorioPropietario();
-            var res = rp.BuscarPorNombre(q);
-            return Json(new { Datos = res });
+            IList<Propietario> p = rp.BuscarPorNombre(buscar);
+            return View("Index",p );
         }
         catch (Exception ex)
         {
-            return Json(new { Error = ex.Message });
+            TempData["Error"] = "Ocurrio un error al buscar el propietario";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

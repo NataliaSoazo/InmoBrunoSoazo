@@ -344,7 +344,7 @@ public class UsuarioController : Controller
                 TempData["Error"] = "Usuario no encontrado";
             }
 
-            return RedirectToAction(nameof(Index));
+            return View("Editar", id);
         }
         catch (System.Exception)
         {
@@ -417,5 +417,16 @@ public class UsuarioController : Controller
             CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
+
+    [Authorize]
+        public ActionResult Perfil()
+
+        {   RepositorioUsuario ru = new RepositorioUsuario();
+            ViewData["Title"] = "Mi perfil";
+            var u = ru.ObtenerPorEmail(User.Identity.Name);
+           RepositorioRol repoRol = new RepositorioRol();
+             ViewBag.Roles = repoRol.ObtenerRoles();
+            return View("Editar", u);
+        }
 
 }

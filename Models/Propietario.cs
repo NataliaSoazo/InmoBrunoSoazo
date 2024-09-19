@@ -29,10 +29,11 @@ public class Propietario
     [Required(ErrorMessage = "Campo obligatorio")]
     public string? Ciudad { get; set; }
     public string? RequestId { get; set; }
+
     // public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-
-    private string ToString(){
-        return (this.Id)+" "+ this.Apellido+ " " + this.Nombre;
+    private string GetToString()
+    {
+        return (this.Id) + " " + this.Apellido + " " + this.Nombre;
     }
 }

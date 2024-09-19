@@ -18,18 +18,16 @@ public class TipoInmuebleController : Controller
 
         _logger = logger;
     }
-    
     [Authorize]
     public IActionResult Index()
     {
         RepositorioTipoInmueble rp = new RepositorioTipoInmueble();
         IList<TipoInmueble> lista = new List<TipoInmueble>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.ObtenerTipos();
-            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-            ViewBag.UserRole = userRole;
-            
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
@@ -42,8 +40,8 @@ public class TipoInmuebleController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener la lista de propietarios");
-            TempData["Error"] = "Ocurrio un error al obtener la lista de propietarios";
+            _logger.LogError(ex, "Error al obtener la lista de tipos de inmueble");
+            TempData["Error"] = "Ocurrio un error al obtener la lista de tipos de inmueble";
             ViewBag.Error = TempData["Error"];
             return View(lista);
         }

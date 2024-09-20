@@ -29,8 +29,6 @@ public class PropietarioController : Controller
         try
         {
             lista = rp.GetPropietarios();
-            var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
-            ViewBag.UserRole = userRole;
             
             if (TempData.ContainsKey("Mensaje"))
             {

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-09-2024 a las 02:46:36
+-- Tiempo de generación: 20-09-2024 a las 21:12:03
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.1.25
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -131,7 +131,10 @@ CREATE TABLE `pagos` (
 --
 
 INSERT INTO `pagos` (`Id`, `Numero`, `Fecha`, `Referencia`, `Importe`, `Anulado`, `IdContrato`) VALUES
-(8, 1, '2024-09-11', 'cuota 1', 150000, 'NO', 8);
+(8, 1, '2024-09-11', 'cuota 1', 150000, 'SI', 8),
+(9, 3, '2000-02-12', 'comision', 12345678, 'SI', 7),
+(10, 4, '2014-03-31', 'comision', 567444444, 'NO', 8),
+(11, 2, '2024-02-12', 'comision', 14000000, 'NO', 8);
 
 -- --------------------------------------------------------
 
@@ -166,8 +169,7 @@ INSERT INTO `propietarios` (`Id`, `Nombre`, `Apellido`, `Dni`, `Email`, `Telefon
 (14, 'ABEL', 'CASTILLO', '1234554321', 'ABELITO@MAIL', '2664231768', 'MENDOZA', 'SAN LUIS'),
 (15, 'TEODORO', 'BLANCO', '266754389', 'TEO@MAIL', '5367823145', 'CORDOBA', 'SAN LUIS'),
 (16, 'VICTORIA', 'ROSARIO', '4256341724', 'VICKI@MAIL', '2456378123', 'MISIONES 800', 'SAN LUIS'),
-(17, 'PRUDENCIO', 'ANDRADE', '4256341724', 'JANDRADE@GMAIL.COM', '2554346578', '90', 'SAN LUIS'),
-(18, 'JAVIER', 'ROSARIO', '4256341724', 'VICKI@MAIL', '2456378123', 'MISIONES 800', 'SAN LUIS');
+(17, 'PRUDENCIO', 'ANDRADE', '4256341724', 'JANDRADE@GMAIL.COM', '2554346578', '90', 'SAN LUIS');
 
 -- --------------------------------------------------------
 
@@ -195,18 +197,19 @@ INSERT INTO `roles` (`Numero`, `Rol`) VALUES
 --
 
 CREATE TABLE `tipoinmuebles` (
-  `Tipo` varchar(20) NOT NULL
+  `Tipo` varchar(20) NOT NULL,
+  `Id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tipoinmuebles`
 --
 
-INSERT INTO `tipoinmuebles` (`Tipo`) VALUES
-('LOCAL'),
-('DEPOSITO'),
-('CASA'),
-('DEPARTAMENTO');
+INSERT INTO `tipoinmuebles` (`Tipo`, `Id`) VALUES
+('LOCAL', 1),
+('DEPOSITO', 2),
+('CASA', 3),
+('DEPARTAMENTO', 4);
 
 -- --------------------------------------------------------
 
@@ -229,8 +232,10 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`Id`, `Nombre`, `Apellido`, `Correo`, `Clave`, `Rol`, `AvatarURL`) VALUES
-(2, 'MARCOS', 'MORALES', 'mmorales@gmail.com', 'aHaNIdWhIn/KUG4lz+NUpsu+abT3qjSn0BLpdfFBIo4=', 1, '/ImgSubidas\\avatar_2.jpg'),
-(4, 'JESUS', 'GONZALEZ', 'je@gmail.com', 'aHaNIdWhIn/KUG4lz+NUpsu+abT3qjSn0BLpdfFBIo4=', 1, '/ImgSubidas\\avatar_4.jpg');
+(7, 'LAURA', 'SUAREZ', 'lauraperez12@gmail.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 1, '/ImgSubidas\\anonimo.jpg'),
+(9, 'GIULIETTA', 'BRUNO', 'jes@gmail.com', 'orG0/zZ0z0h2Zv102mCFIWuW7ShFJcquhvt2i01OeuY=', 2, '/ImgSubidas\\anonimo.jpg'),
+(10, 'GIULIETTA', 'BRUNO', 'giulietta133@gmail.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 2, '/ImgSubidas\\anonimo.jpg'),
+(11, 'CARLOS', 'PEREZ', 'we332@gmial.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 1, '/ImgSubidas\\anonimo.jpg');
 
 --
 -- Índices para tablas volcadas
@@ -277,6 +282,12 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`Numero`);
 
 --
+-- Indices de la tabla `tipoinmuebles`
+--
+ALTER TABLE `tipoinmuebles`
+  ADD PRIMARY KEY (`Id`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -290,7 +301,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `contratos`
 --
 ALTER TABLE `contratos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `inmuebles`
@@ -308,7 +319,7 @@ ALTER TABLE `inquilinos`
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `propietarios`
@@ -323,10 +334,16 @@ ALTER TABLE `roles`
   MODIFY `Numero` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `tipoinmuebles`
+--
+ALTER TABLE `tipoinmuebles`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Restricciones para tablas volcadas

@@ -24,6 +24,8 @@ public class PropietarioController : Controller
     {
         RepositorioPropietario rp = new RepositorioPropietario();
         IList<Propietario> lista = new List<Propietario>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.GetPropietarios();

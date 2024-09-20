@@ -42,6 +42,8 @@ public class UsuarioController : Controller
     {
         RepositorioUsuario repositorio = new RepositorioUsuario();
         IList<Usuario> lista = new List<Usuario>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = repositorio.GetUsuarios();

@@ -37,7 +37,7 @@ app.UseAuthorization();
 // Mapeo de rutas
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Loguin}/{id?}");
+    pattern: "{controller=Usuario}/{action=Loguin}/{id?}");
 
 app.MapControllerRoute(
     name: "usuarios",

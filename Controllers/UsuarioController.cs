@@ -384,7 +384,7 @@ public class UsuarioController : Controller
             {
                 ViewBag.Error = "Usuario o clave incorrectos";
                 TempData["returnUrl"] = returnUrl;
-                return RedirectToAction("Loguin", "Home");
+                return View();
             }
 
             var claims = new List<Claim>
@@ -405,8 +405,11 @@ public class UsuarioController : Controller
             return RedirectToAction("Index", "Home");
         }
         TempData["returnUrl"] = returnUrl;
-        return RedirectToAction("Loguin", "Home");
-
+        return View();
+    }
+       [HttpGet]
+     public  IActionResult Loguin(string returnUrl){
+        return View();
 
     }
     [Route("salir", Name = "logout")]
@@ -414,7 +417,7 @@ public class UsuarioController : Controller
     {
         await HttpContext.SignOutAsync(
             CookieAuthenticationDefaults.AuthenticationScheme);
-         return RedirectToAction("Loguin", "Home");
+         return View("Loguin");
     }
 
     [Authorize]

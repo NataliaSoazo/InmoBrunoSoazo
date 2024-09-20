@@ -236,7 +236,7 @@ public class UsuarioController : Controller
                     }
                     ru.EditarDatos(usuarioExistente);
                     TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
-                    return RedirectToAction(nameof(Index));
+                    return View("Editar", usuarioExistente);
                 }
                 else
                 {
@@ -331,20 +331,18 @@ public class UsuarioController : Controller
                         eliminaArchivoAnterior(usuarioExistente);
                         usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
                         ru.EditarAvatar(usuarioExistente);
+                        return View("Detalles", usuarioExistente);
                     }
-                    TempData["Mensaje"] = "El avatar ha sido eliminado";
+                    
                 }
                 else
                 {
                     TempData["Error"] = "No tiene permisos para eliminar el avatar de este usuario.";
                 }
             }
-            else
-            {
-                TempData["Error"] = "Usuario no encontrado";
-            }
 
             return RedirectToAction(nameof(Index));
+
         }
         catch (System.Exception)
         {
@@ -407,8 +405,9 @@ public class UsuarioController : Controller
         TempData["returnUrl"] = returnUrl;
         return View();
     }
-       [HttpGet]
-     public  IActionResult Loguin(string returnUrl){
+    [HttpGet]
+    public IActionResult Loguin(string returnUrl)
+    {
         return View();
 
     }
@@ -417,18 +416,19 @@ public class UsuarioController : Controller
     {
         await HttpContext.SignOutAsync(
             CookieAuthenticationDefaults.AuthenticationScheme);
-         return View("Loguin");
+        return View("Loguin");
     }
 
     [Authorize]
-        public ActionResult Perfil()
+    public ActionResult Perfil()
 
-        {   RepositorioUsuario ru = new RepositorioUsuario();
-            ViewData["Title"] = "Mi perfil";
-            var u = ru.ObtenerPorEmail(User.Identity.Name);
-           RepositorioRol repoRol = new RepositorioRol();
-             ViewBag.Roles = repoRol.ObtenerRoles();
-            return View("Editar", u);
-        }
+    {
+        RepositorioUsuario ru = new RepositorioUsuario();
+        ViewData["Title"] = "Mi perfil";
+        var u = ru.ObtenerPorEmail(User.Identity.Name);
+        RepositorioRol repoRol = new RepositorioRol();
+        ViewBag.Roles = repoRol.ObtenerRoles();
+        return View("Editar", u);
+    }
 
 }

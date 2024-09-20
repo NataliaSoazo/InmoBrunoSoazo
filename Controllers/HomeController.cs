@@ -12,7 +12,7 @@ public class HomeController : Controller
     {
         _logger = logger;
     }
-
+  
     public IActionResult Index()
     {
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;

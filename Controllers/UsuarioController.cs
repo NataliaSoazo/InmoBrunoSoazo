@@ -269,25 +269,17 @@ public class UsuarioController : Controller
             var user = ru.getUsuario(id);
             var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
 
-            if (user != null)
+            // Verificar si el usuario actual es el mismo que va a cambiar la contraseña o es un administrador
+            if (user != null&&usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
             {
-                // Verificar si el usuario actual es el mismo que va a cambiar la contraseña o es un administrador
-                if (usuarioActual != null && (usuarioActual.Id == id || userRole == "ADMINISTRADOR"))
-                {
-                    user.Clave = HashPassword(u.Clave);
-                    ru.EditarClave(user);
-                    TempData["Mensaje"] = "Clave editada correctamente";
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    TempData["Error"] = "No tiene permisos para cambiar la contraseña de este usuario.";
-                    return RedirectToAction(nameof(Index));
-                }
+                user.Clave = HashPassword(u.Clave);
+                ru.EditarClave(user);
+                ViewBag.Mensaje = "Clave editada correctamente";
+                return View("Editar", user);
             }
             else
             {
-                TempData["Error"] = "Usuario no encontrado";
+                ViewBag.Error = "No tiene permisos para cambiar la contraseña de este usuario.";
                 return RedirectToAction(nameof(Index));
             }
         }

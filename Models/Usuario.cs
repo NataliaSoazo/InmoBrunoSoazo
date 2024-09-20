@@ -14,13 +14,13 @@ public class Usuario
 	[Key]
 	[Display(Name = "CÓDIGO")]
 	public int Id { get; set; }
-	[Required]
+	
 	[Display(Name = "NOMBRE")]
 	public string? Nombre { get; set; }
-	[Required]
+	
 	[Display(Name = "APELLIDO")]
 	public string? Apellido { get; set; }
-	[Required, EmailAddress]
+	
 	[Display(Name = "E- MAIL")]
 	public string? Correo { get; set; }
 	[DataType(DataType.Password)]

@@ -237,7 +237,7 @@ public class UsuarioController : Controller
                         GuardarAvatar(usuarioExistente);
                     }
                     ru.EditarDatos(usuarioExistente);
-                    TempData["Mensaje"] = "Datos del usuario actualizados correctamente";
+                     ViewBag.Mensaje = "Datos del usuario actualizados correctamente";
                     return View("Editar", usuarioExistente);
                 }
                 else
@@ -325,7 +325,9 @@ public class UsuarioController : Controller
                         eliminaArchivoAnterior(usuarioExistente);
                         usuarioExistente.AvatarURL = Path.Combine("/ImgSubidas", "anonimo.jpg");
                         ru.EditarAvatar(usuarioExistente);
-                        return View("Detalles", usuarioExistente);
+                        ViewBag.Mensaje = "La imagen se eliminó correctamente.";
+                        return View("Editar", usuarioExistente);
+
                     }
                     
                 }

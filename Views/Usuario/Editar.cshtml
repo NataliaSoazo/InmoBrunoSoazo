@@ -59,7 +59,7 @@
              <input type="hidden" name="id" value="@Model.Id" />
             <div class="form-group col-6" >
                 <label asp-for="Clave" class="control-label"></label>
-                <input asp-for="Clave" class="form-control" />
+                <input asp-for="Clave" class="form-control" required/>
                 @if (Model.Id == 0) // Si el ID es 0, es una creación, no una edición
                     {
                     <span class="text-danger">* Este campo es obligatorio para nuevos usuarios</span>

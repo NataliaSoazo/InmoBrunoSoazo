@@ -143,6 +143,8 @@ public class PagoController : Controller
     {
         RepositorioPago rp = new RepositorioPago();
         IList<Pago> lista = new List<Pago>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rp.GetPagos();

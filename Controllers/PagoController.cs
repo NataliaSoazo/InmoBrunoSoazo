@@ -24,6 +24,7 @@ public class PagoController : Controller
         try
         {
             lista = rp.GetPagos();
+
             if (TempData.ContainsKey("Mensaje"))
             {
                 ViewBag.Mensaje = TempData["Mensaje"];
@@ -46,7 +47,13 @@ public class PagoController : Controller
     public IActionResult Editar(int? id, int? idContrato)
     {
         RepositorioContrato repoContrato = new RepositorioContrato();
-        ViewBag.Contratos = repoContrato.GetContratos();
+        var lista = repoContrato.GetContratos();
+        lista = lista.Where(x =>
+                x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
+                x.Anulado == false             // Contratos que NO están anulados
+            ).ToList();
+
+        ViewBag.Contratos = lista;
 
         var pago = new Pago();
 
@@ -70,6 +77,8 @@ public class PagoController : Controller
         {
             pago.IdContrato = idContrato.Value;
         }
+        RepositorioUsuario ru = new RepositorioUsuario();
+        var usuario = ru.ObtenerPorEmail(User.Identity.Name);
         try
         {
             RepositorioPago rp = new RepositorioPago();
@@ -81,6 +90,8 @@ public class PagoController : Controller
             }
             else
             {
+                pago.IdUsuarioComenzo = usuario.Id;
+                pago.IdUsuarioTermino = null;
                 rp.AltaPago(pago);
                 return RedirectToAction(nameof(Index));
             }
@@ -98,7 +109,9 @@ public class PagoController : Controller
         try
         {
             RepositorioPago rp = new RepositorioPago();
-            rp.EliminarPago(id);
+            RepositorioUsuario ru = new RepositorioUsuario();
+            var usuario = ru.ObtenerPorEmail(User.Identity.Name);
+            rp.EliminarPago(id, usuario.Id);
             TempData["Mensaje"] = "El pago ha sido anulado correctamente.";
             return RedirectToAction(nameof(Index));
         }
@@ -112,7 +125,17 @@ public class PagoController : Controller
     public IActionResult Detalles(int id)
     {
         RepositorioPago rp = new RepositorioPago();
+        RepositorioUsuario ru = new RepositorioUsuario();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         var p = rp.GetPago(id);
+        var usuarioC = ru.getUsuario(p.IdUsuarioComenzo);
+        ViewBag.UsuarioC = usuarioC;
+        if (p.IdUsuarioTermino.HasValue)
+        {
+            var usuarioT = ru.getUsuario(p.IdUsuarioTermino.Value);
+            ViewBag.UsuarioT = usuarioT;
+        }
         return View(p);
     }
     [Authorize]

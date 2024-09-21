@@ -36,5 +36,11 @@ namespace PROYECTO_BRUNO_SOAZO.Models
         [Display(Name = "CONTRATO")]
         public int IdContrato { get; set; }
 
+        [Display(Name = "USUARIO QUE CREÓ EL PAGO")]
+        public int IdUsuarioComenzo { get; set; }
+
+        [Display(Name = "USUARIO QUE TERMINÓ EL PAGO")]
+        public int? IdUsuarioTermino { get; set; } 
+
     }
 }

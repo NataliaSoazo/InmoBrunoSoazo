@@ -48,8 +48,8 @@ public class RepositorioPago
         int id = 0;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"INSERT INTO pagos ( {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}) 
-                        VALUES (@{nameof(Pago.Numero)}, @{nameof(Pago.Fecha)}, @{nameof(Pago.Referencia)}, @{nameof(Pago.Importe)}, @{nameof(Pago.Anulado)}, @{nameof(Pago.IdContrato)});           
+            string sql = $@"INSERT INTO pagos ( {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}) 
+                        VALUES (@{nameof(Pago.Numero)}, @{nameof(Pago.Fecha)}, @{nameof(Pago.Referencia)}, @{nameof(Pago.Importe)}, @{nameof(Pago.Anulado)}, @{nameof(Pago.IdContrato)}, @{nameof(Pago.IdUsuarioComenzo)}, @{nameof(Pago.IdUsuarioTermino)});           
                         SELECT LAST_INSERT_ID();";
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -60,6 +60,8 @@ public class RepositorioPago
                 command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Anulado)}", "NO");
                 command.Parameters.AddWithValue($"@{nameof(Pago.IdContrato)}", pago.IdContrato);
+                command.Parameters.AddWithValue($"@{nameof(Pago.IdUsuarioComenzo)}", pago.IdUsuarioComenzo);
+                command.Parameters.AddWithValue($"@{nameof(Pago.IdUsuarioTermino)}", pago.IdUsuarioTermino);
 
                 connection.Open();
                 id = Convert.ToInt32(command.ExecuteScalar());
@@ -75,7 +77,7 @@ public class RepositorioPago
         Pago? pagos = null;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
+            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}
                 FROM pagos p
                 WHERE p.{nameof(Pago.Id)} = @{nameof(Pago.Id)};";
             using (var command = new MySqlCommand(sql, connection))
@@ -95,6 +97,10 @@ public class RepositorioPago
                             Importe = reader.GetDouble(reader.GetOrdinal(nameof(Pago.Importe))),
                             Anulado = reader.GetString(reader.GetOrdinal(nameof(Pago.Anulado))),
                             IdContrato = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdContrato))),
+                            IdUsuarioComenzo = reader.GetInt32(reader.GetOrdinal(nameof(Pago.IdUsuarioComenzo))),
+                            IdUsuarioTermino = !reader.IsDBNull(reader.GetOrdinal(nameof(Contrato.IdUsuarioTermino))) ?
+                            reader.GetInt32(reader.GetOrdinal(nameof(Contrato.IdUsuarioTermino))) :
+                            (int?)null
                         };
                     }
                 }
@@ -133,14 +139,15 @@ public class RepositorioPago
     }
 
 
-    public int EliminarPago(int id) //Es un anulado lógico
+    public int EliminarPago(int id, int idUsuarioTermino) //Es un anulado lógico
     {
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = 'SI' WHERE {nameof(Pago.Id)} = @{nameof(Pago.Id)};";
+            var sql = @$"UPDATE pagos SET {nameof(Pago.Anulado)} = 'SI', {nameof(Pago.IdUsuarioTermino)} = @idUsuarioTermino WHERE {nameof(Pago.Id)} = @id;";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Pago.Id)}", id);
+                command.Parameters.AddWithValue($"@IdUsuarioTermino", idUsuarioTermino); 
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();

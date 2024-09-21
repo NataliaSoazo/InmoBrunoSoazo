@@ -186,7 +186,7 @@ public class RepositorioContrato
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Contrato.Id)}", id);
-                command.Parameters.AddWithValue($"@IdUsuarioTermino", IdUsuarioTermino); // Asegúrate de agregar este parámetro
+                command.Parameters.AddWithValue($"@IdUsuarioTermino", IdUsuarioTermino); 
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -232,5 +232,6 @@ public class RepositorioContrato
 
         return inmueblesDisponibles;
     }
+
 
 }

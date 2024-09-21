@@ -52,6 +52,30 @@
         <dd class = "col-6 ">
             @Html.DisplayFor(model => model.IdContrato)
         </dd>
+         @if (ViewBag.UserRole == "ADMINISTRADOR")
+        {
+            <dt class="col-6">
+                CREADO POR
+            </dt>
+            <dd class="col-6">
+               @ViewBag.UsuarioC.Id @ViewBag.UsuarioC.Nombre @ViewBag.UsuarioC.Apellido
+            </dd>
+            @if (Model.IdUsuarioTermino != null && Model.Anulado == "SI")
+            {
+                <dt class="col-6">
+                    ANULADO
+                </dt>
+                <dd class="col-6">
+                    SI
+                </dd>
+                <dt class="col-6">
+                    TERMINADO POR
+                </dt>
+                <dd class="col-6">
+                    @ViewBag.UsuarioT.Id @ViewBag.UsuarioT.Nombre @ViewBag.UsuarioT.Apellido
+                </dd>
+            }
+        }
     </dl>
 </div>
 <div>

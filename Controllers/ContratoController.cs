@@ -157,10 +157,6 @@ public class ContratoController : Controller
         try
         {
             lista = rc.GetContratos();
-            foreach (var contrato in lista)
-            {
-                Console.WriteLine($"Contrato ID: {contrato.Id}, Anulado: {contrato.Anulado}, FechaTerm: {contrato.FechaTerm}");
-            }
             lista = lista.Where(x =>
                 x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
                 x.Anulado == false             // Contratos que NO están anulados

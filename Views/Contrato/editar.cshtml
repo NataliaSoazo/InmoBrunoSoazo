@@ -64,7 +64,6 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/select2/select2.min.js"></script>
 <script>
-    
     $(document).ready(function () {
         $('#selectInquilinos').select2();
         $('#selectInmuebles').select2();
@@ -75,7 +74,7 @@
             var fechaInicio = $('#fechaInicio').val();
             var fechaTerm = $('#fechaTerm').val();
             var contratoId = '@Model?.Id';  // Aquí obtenemos el ID del contrato actual
-            var inmuebleSeleccionadoId = @Model?.IdInmueble; // Aquí obtenemos el ID del inmueble actualmente seleccionado
+            var inmuebleSeleccionadoId = '@Model?.IdInmueble'; // Aquí obtenemos el ID del inmueble actualmente seleccionado
 
             var fechaInicioDate = fechaInicio ? new Date(fechaInicio) : null;
             var fechaTermDate = fechaTerm ? new Date(fechaTerm) : null;
@@ -86,9 +85,13 @@
                     return true;
                 }
 
-                // Filtrar por disponibilidad primero
+                // Filtrar por disponibilidad
                 if (inmueble.Disponible === 'NO') {
                     return false;
+                }
+
+                if (contratos.length === 0) {
+                    return true; // Si no hay contratos, todos los inmuebles están disponibles
                 }
 
                 // Filtrar por fechas de ocupación
@@ -97,20 +100,25 @@
                         var fechaInicioOcupado = new Date(contrato.FechaInicio);
                         var fechaTermOcupado = new Date(contrato.FechaTerm);
 
+                        // Excluir inmuebles que están ocupados y cuyos contratos NO estén anulados
                         return (
                             contrato.IdInmueble === inmueble.Id &&
-                            ((fechaInicioDate >= fechaInicioOcupado && fechaInicioDate <= fechaTermOcupado) ||
-                            (fechaTermDate >= fechaInicioOcupado && fechaTermDate <= fechaTermOcupado) ||
-                            (fechaInicioDate <= fechaInicioOcupado && fechaTermDate >= fechaTermOcupado))
+                            !contrato.Anulado &&  // Excluir contratos que no están anulados
+                            (
+                                (fechaInicioDate >= fechaInicioOcupado && fechaInicioDate <= fechaTermOcupado) ||
+                                (fechaTermDate >= fechaInicioOcupado && fechaTermDate <= fechaTermOcupado) ||
+                                (fechaInicioDate <= fechaInicioOcupado && fechaTermDate >= fechaTermOcupado)
+                            )
                         );
                     });
                 }
 
-                return true;
+                return true; // Si no hay fechas, el inmueble es elegible
             });
 
             var $selectInmuebles = $('#selectInmuebles');
             $selectInmuebles.empty();
+
             if (inmueblesFiltrados.length > 0) {
                 inmueblesFiltrados.forEach(function (inmueble) {
                     var isSelected = inmueble.Id === inmuebleSeleccionadoId ? "selected" : "";
@@ -126,7 +134,7 @@
             }
         }
 
-        // Llamar a la función para inicializar la lista de inmuebles
+        // Inicializar la lista de inmuebles
         actualizarInmuebles();
 
         // Actualizar la lista cuando cambien las fechas
@@ -135,7 +143,6 @@
         });
     });
 </script>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

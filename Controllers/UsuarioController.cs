@@ -386,6 +386,7 @@ public class UsuarioController : Controller
                     new Claim(ClaimTypes.Name, e.Correo),
                     new Claim("FullName", e.Nombre + " " + e.Apellido),
                     new Claim("Rol", e.Datos.rol.ToString()),
+                    new Claim("Id", e.Id.ToString()),
                     };
 
             var claimsIdentity = new ClaimsIdentity(

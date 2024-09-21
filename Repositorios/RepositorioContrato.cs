@@ -16,7 +16,7 @@ public class RepositorioContrato
         var contratos = new List<Contrato>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT i.{nameof(Contrato.Id)}, {nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)},
+            string sql = $@"SELECT i.{nameof(Contrato.Id)}, {nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)}, {nameof(Contrato.Anulado)},
                       p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Contrato.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
                 FROM Contratos i 
                 INNER JOIN Inquilinos p ON i.{nameof(Contrato.IdInquilino)} = p.{nameof(Inquilino.Id)}
@@ -49,7 +49,8 @@ public class RepositorioContrato
 
                                 Direccion = reader.GetString(nameof(Inmueble.Direccion))
 
-                            }
+                            },
+                            Anulado = reader.GetBoolean(nameof(Contrato.Anulado))
 
                         });
                     }
@@ -63,24 +64,34 @@ public class RepositorioContrato
     public int AltaContrato(Contrato contrato)
     {
         int id = 0;
-        using (var connection = new MySqlConnection(ConnectionString))
+        try
         {
-            string sql = $@"INSERT INTO contratos ( {nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)}, {nameof(Contrato.IdInmueble)}) 
-                VALUES (@{nameof(Contrato.FechaInicio)}, @{nameof(Contrato.FechaTerm)}, @{nameof(Contrato.MontoMensual)}, @{nameof(Contrato.IdInquilino)},@{nameof(Contrato.IdInmueble)});           
-                SELECT LAST_INSERT_ID();";
-            using (var command = new MySqlCommand(sql, connection))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                command.Parameters.AddWithValue($"@{nameof(Contrato.FechaInicio)}", contrato.FechaInicio);
-                command.Parameters.AddWithValue($"@{nameof(Contrato.FechaTerm)}", contrato.FechaTerm);
-                command.Parameters.AddWithValue($"@{nameof(Contrato.MontoMensual)}", contrato.MontoMensual);
-                command.Parameters.AddWithValue($"@{nameof(Contrato.IdInquilino)}", contrato.IdInquilino);
-                command.Parameters.AddWithValue($"@{nameof(Contrato.IdInmueble)}", contrato.IdInmueble);
+                string sql = $@"INSERT INTO contratos ({nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)}, {nameof(Contrato.IdInmueble)}, {nameof(Contrato.IdUsuarioComenzo)}, {nameof(Contrato.IdUsuarioTermino)}, {nameof(Contrato.Anulado)}) 
+            VALUES (@{nameof(Contrato.FechaInicio)}, @{nameof(Contrato.FechaTerm)}, @{nameof(Contrato.MontoMensual)}, @{nameof(Contrato.IdInquilino)}, @{nameof(Contrato.IdInmueble)}, @{nameof(Contrato.IdUsuarioComenzo)}, null, false);           
+            SELECT LAST_INSERT_ID();";
 
-                connection.Open();
-                id = Convert.ToInt32(command.ExecuteScalar());
-                contrato.Id = id;
-                connection.Close();
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.FechaInicio)}", contrato.FechaInicio);
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.FechaTerm)}", contrato.FechaTerm);
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.MontoMensual)}", contrato.MontoMensual);
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.IdInquilino)}", contrato.IdInquilino);
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.IdInmueble)}", contrato.IdInmueble);
+                    command.Parameters.AddWithValue($"@{nameof(Contrato.IdUsuarioComenzo)}", contrato.IdUsuarioComenzo);
+
+                    connection.Open();
+                    id = Convert.ToInt32(command.ExecuteScalar());
+                    contrato.Id = id;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones: puedes registrar el error o volver a lanzarlo
+            Console.WriteLine($"Error al insertar contrato: {ex.Message}");
+            throw; // o manejarlo de otra manera
         }
         return id;
     }
@@ -90,10 +101,12 @@ public class RepositorioContrato
         Contrato? contrato = null;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT i.{nameof(Contrato.Id)}, {nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)}, 
-                      p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Contrato.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
-                FROM contratos i INNER JOIN Inquilinos p ON i.{nameof(Contrato.IdInquilino)} = p.{nameof(Inquilino.Id)}
-                                  INNER JOIN Inmuebles m ON i.{nameof(Contrato.IdInmueble)} = m.{nameof(Inmueble.Id)}
+            string sql = $@"SELECT i.{nameof(Contrato.Id)}, {nameof(Contrato.FechaInicio)}, {nameof(Contrato.FechaTerm)}, {nameof(Contrato.MontoMensual)}, {nameof(Contrato.IdInquilino)},
+                      p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Contrato.IdInmueble)}, m.{nameof(Inmueble.Direccion)}, 
+                      i.{nameof(Contrato.IdUsuarioComenzo)}, i.{nameof(Contrato.IdUsuarioTermino)}, i.{nameof(Contrato.Anulado)}
+                FROM contratos i 
+                INNER JOIN Inquilinos p ON i.{nameof(Contrato.IdInquilino)} = p.{nameof(Inquilino.Id)}
+                INNER JOIN Inmuebles m ON i.{nameof(Contrato.IdInmueble)} = m.{nameof(Inmueble.Id)}
                 WHERE i.{nameof(Contrato.Id)} = @id";
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -121,7 +134,12 @@ public class RepositorioContrato
                             {
                                 Direccion = reader.GetString(nameof(Inmueble.Direccion))
 
-                            }
+                            },
+                            IdUsuarioComenzo = reader.GetInt32(nameof(Contrato.IdUsuarioComenzo)),
+                            IdUsuarioTermino = !reader.IsDBNull(reader.GetOrdinal(nameof(Contrato.IdUsuarioTermino))) ?
+                            reader.GetInt32(reader.GetOrdinal(nameof(Contrato.IdUsuarioTermino))) :
+                            (int?)null,
+                            Anulado = reader.GetBoolean(nameof(Contrato.Anulado))
                         };
                     }
                 }
@@ -160,14 +178,16 @@ public class RepositorioContrato
         return 0;
     }
 
-    public int EliminarContrato(int id)
+    public int AnularContrato(int id, int IdUsuarioTermino)
     {
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"DELETE from contratos WHERE {nameof(Contrato.Id)} = @{nameof(Contrato.Id)}";
+            var sql = @$"UPDATE contratos SET {nameof(Contrato.Anulado)} = true, {nameof(Contrato.IdUsuarioTermino)} = @IdUsuarioTermino WHERE {nameof(Contrato.Id)} = @id";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Contrato.Id)}", id);
+                command.Parameters.AddWithValue($"@IdUsuarioTermino", IdUsuarioTermino); // Asegúrate de agregar este parámetro
+
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -191,15 +211,19 @@ public class RepositorioContrato
         RepositorioInmueble ri = new RepositorioInmueble();
         var inmuebles = ri.ObtenerTodos();
 
-        var inmueblesOcupadosIds = contratos
-            .Where(contrato =>
+         var inmueblesOcupadosIds = contratos
+        .Where(contrato =>
+            !contrato.Anulado &&  // Solo considerar contratos que NO están anulados (Anulado = false)
+            (
                 (fechaInicio > contrato.FechaInicio && fechaInicio < contrato.FechaTerm) ||  // Fecha inicio está dentro de un contrato existente
                 (fechaFin > contrato.FechaInicio && fechaFin < contrato.FechaTerm) ||        // Fecha fin está dentro de un contrato existente
                 (fechaInicio <= contrato.FechaInicio && fechaFin >= contrato.FechaTerm)      // El nuevo contrato abarca todo el periodo de un contrato existente
             )
-            .Select(contrato => contrato.IdInmueble)
-            .Distinct()
-            .ToList();
+        )
+        .Select(contrato => contrato.IdInmueble)
+        .Distinct()
+        .ToList();
+
 
         // Filtrar inmuebles disponibles
         var inmueblesDisponibles = inmuebles

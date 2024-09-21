@@ -21,7 +21,7 @@ public class ContratoController : Controller
         IList<Contrato> lista = new List<Contrato>();
         var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
         ViewBag.UserRole = userRole;
-        
+
         try
         {
             lista = rc.GetContratos();
@@ -43,7 +43,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
-     [Authorize]
+    [Authorize]
     public IActionResult Editar(int id)
 
     {
@@ -62,21 +62,30 @@ public class ContratoController : Controller
         {
             RepositorioContrato rc = new RepositorioContrato();
             var contrato = rc.GetContrato(id);
-            return View(contrato);
+            if (contrato.Anulado == true)
+            {
+                TempData["Error"] = "No se puede modificar un contrato anulado.";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return View(contrato);
+            }
         }
         else
         {
             return View();
         }
     }
-     [Authorize]
+    [Authorize]
     public IActionResult Guardar(Contrato contrato)
     {
+        RepositorioUsuario ru = new RepositorioUsuario();
         try
         {
             RepositorioContrato rc = new RepositorioContrato();
             Boolean validado = rc.validarContrato(contrato);
-
+            var usuario = ru.ObtenerPorEmail(User.Identity.Name);
             if (validado == true)
             {
 
@@ -87,7 +96,9 @@ public class ContratoController : Controller
 
                 }
                 else
-                    rc.AltaContrato(contrato);
+                    contrato.IdUsuarioComenzo = usuario.Id;
+                contrato.IdUsuarioTermino = null;
+                rc.AltaContrato(contrato);
                 return RedirectToAction(nameof(Index));
             }
             else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
@@ -99,38 +110,61 @@ public class ContratoController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-     [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Eliminar(int id)
     {
+        RepositorioUsuario ru = new RepositorioUsuario();
+        var usuario = ru.ObtenerPorEmail(User.Identity.Name);
         try
         {
             RepositorioContrato rc = new RepositorioContrato();
-            rc.EliminarContrato(id);
+            rc.AnularContrato(id, usuario.Id);
+
             TempData["Mensaje"] = "El contrato ha sido eliminado correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch
         {
-            TempData["Error"] = "No se pudo completar la eliminación.";
+            TempData["Error"] = "No se pudo completar la eliminación." + usuario.Id;
             return RedirectToAction(nameof(Index));
         }
     }
-     [Authorize]
+    [Authorize]
     public IActionResult Detalles(int id)
     {
+        RepositorioUsuario ru = new RepositorioUsuario();
         RepositorioContrato rc = new RepositorioContrato();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         var i = rc.GetContrato(id);
+        var usuarioC = ru.getUsuario(i.IdUsuarioComenzo);
+        ViewBag.UsuarioC = usuarioC;
+        if (i.IdUsuarioTermino.HasValue)
+        {
+            var usuarioT = ru.getUsuario(i.IdUsuarioTermino.Value);
+            ViewBag.UsuarioT = usuarioT;
+        }
+
         return View(i);
     }
-     [Authorize]
+    [Authorize]
     public IActionResult VerVigentes()
     {
         RepositorioContrato rc = new RepositorioContrato();
         IList<Contrato> lista = new List<Contrato>();
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == "Rol")?.Value;
+        ViewBag.UserRole = userRole;
         try
         {
             lista = rc.GetContratos();
-            lista = lista.Where(x => x.FechaTerm > DateTime.Now).ToList();
+            foreach (var contrato in lista)
+            {
+                Console.WriteLine($"Contrato ID: {contrato.Id}, Anulado: {contrato.Anulado}, FechaTerm: {contrato.FechaTerm}");
+            }
+            lista = lista.Where(x =>
+                x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
+                x.Anulado == false             // Contratos que NO están anulados
+            ).ToList();
             return View("Index", lista);
         }
         catch (Exception ex)
@@ -139,7 +173,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
-     [Authorize]
+    [Authorize]
     public IActionResult ListarContratosInmueble(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
@@ -156,7 +190,7 @@ public class ContratoController : Controller
             return View(lista);
         }
     }
-     [Authorize]
+    [Authorize]
     public IActionResult Renovar(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
@@ -176,9 +210,10 @@ public class ContratoController : Controller
             TempData["Error"] = "Contrato no encontrado";
             return RedirectToAction(nameof(Index));
         }
-        if(contrato.FechaTerm > DateTime.Now){
+        if (contrato.FechaTerm > DateTime.Now && contrato.Anulado == false)
+        {
             TempData["Error"] = "El contrato aun no ha terminado";
-            return RedirectToAction(nameof(Index));    
+            return RedirectToAction(nameof(Index));
         }
         var nuevoContrato = new Contrato
         {
@@ -186,7 +221,7 @@ public class ContratoController : Controller
             IdInquilino = contrato.IdInquilino,
             MontoMensual = contrato.MontoMensual,
             FechaInicio = DateTime.Now,
-            FechaTerm = DateTime.Now.AddYears(1)
+            FechaTerm = DateTime.Now.AddYears(1),
         };
 
         // Pasar el nuevo contrato a la vista

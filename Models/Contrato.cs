@@ -37,6 +37,15 @@ namespace PROYECTO_BRUNO_SOAZO.Models
         [Display(Name = "DATOS DEL INMUEBLE")]
         public int IdInmueble { get; set; }
 
+        [Display(Name = "USUARIO QUE CREÓ EL CONTRATO")]
+        public int IdUsuarioComenzo { get; set; }
+
+        [Display(Name = "USUARIO QUE TERMINÓ EL CONTRATO")]
+        public int? IdUsuarioTermino { get; set; } 
+
+        [Display(Name = "ANULADO")]
+        public bool Anulado { get; set; }
+
         public Inmueble? Datos { get; set; }
     }
 }

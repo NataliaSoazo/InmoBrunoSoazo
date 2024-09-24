@@ -45,7 +45,9 @@ public class PagoController : Controller
     }
     [Authorize]
     public IActionResult Editar(int? id, int? idContrato)
-    {
+    {   List<string> Referencia = new List<string>{"CANCELACION", "COMISION","CUOTA", "MULTA"};
+        ViewBag.Referencia = Referencia;
+    
         RepositorioContrato repoContrato = new RepositorioContrato();
         var lista = repoContrato.GetContratos();
         lista = lista.Where(x =>
@@ -80,6 +82,8 @@ public class PagoController : Controller
                 x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
                 x.Anulado == false             // Contratos que NO están anulados
             ).ToList();
+        List<string> Referencia = new List<string>{"CANCELACION", "COMISION","CUOTA", "MULTA"};
+        ViewBag.Referencia = Referencia;    
 
         ViewBag.Contratos = lista;
         var pago = new Pago();
@@ -107,14 +111,14 @@ public class PagoController : Controller
             if (pago.Id > 0)
             {
                 rp.ModificarPago(pago);
-                return RedirectToAction(nameof(Index));
+                  return RedirectToAction("PagosContrato", pago.Id);
             }
             else
             {
                 pago.IdUsuarioComenzo = usuario.Id;
                 pago.IdUsuarioTermino = null;
                 rp.AltaPago(pago);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("PagosContrato", pago.Id);
             }
         }
         catch (System.Exception)

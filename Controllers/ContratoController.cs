@@ -84,10 +84,10 @@ public class ContratoController : Controller
         try
         {
             RepositorioContrato rc = new RepositorioContrato();
-            Boolean validado = rc.validarContrato(contrato);
+           // Boolean validado = rc.validarContrato(contrato);
             var usuario = ru.ObtenerPorEmail(User.Identity.Name);
-            if (validado == true)
-            {
+           // if (validado == true)
+           // {
 
                 if (contrato.Id > 0)
                 {
@@ -100,9 +100,9 @@ public class ContratoController : Controller
                 contrato.IdUsuarioTermino = null;
                 rc.AltaContrato(contrato);
                 return RedirectToAction(nameof(Index));
-            }
-            else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
-            return RedirectToAction(nameof(Index));
+           // }
+           // else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
+           // return RedirectToAction(nameof(Index));
         }
         catch (System.Exception)
         {
@@ -223,5 +223,36 @@ public class ContratoController : Controller
         // Pasar el nuevo contrato a la vista
         return View("editar", nuevoContrato);
     }
+    public IActionResult FinalizarContrato(int id)
+    {
+        
+        RepositorioContrato rc = new RepositorioContrato();
+        var i = rc.GetContrato(id);
+       if(!i.Anulado){
+        var deuda =  Adeuda(i);
+        if(deuda>1){
+            ViewBag.Cuotas = deuda;
+        }
+
+       }
+        return View(i);
+    }
+    private  int Adeuda(Contrato i){
+        RepositorioPago rp = new RepositorioPago();
+        List<Pago> cuotas = new List<Pago>();
+        var lista = rp.ObtenerPagosPorContrato(i.Id);
+          foreach (var item in (List<Pago>) lista)
+          
+                    {
+                       if(item.Referencia =="CUOTA"){
+                        cuotas.Add(item);
+                       }
+                    }
+        var mesesTranscurridos = DateTime.Now.Month-i.FechaInicio.Month;
+        var deuda = mesesTranscurridos-cuotas.Count();
+
+        return deuda;
+    }
+
 }
 

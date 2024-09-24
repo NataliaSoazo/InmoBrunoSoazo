@@ -42,6 +42,38 @@ public class RepositorioPago
         }
         return pagos;
     }
+    public IList<Pago> ObtenerPagosPorContrato(int id)
+    {
+        var pagos = new List<Pago>();
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
+                FROM pagos p
+                 WHERE p.{nameof(Pago.IdContrato)} = @{nameof(Pago.IdContrato)};";
+            using (var command = new MySqlCommand(sql, connection))
+            {   command.Parameters.AddWithValue($"@{nameof(Pago.IdContrato)}", id);
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        pagos.Add(new Pago
+                        {
+                            Id = reader.GetInt32(nameof(Pago.Id)),
+                            Numero = reader.GetInt32(nameof(Pago.Numero)),
+                            Fecha = reader.GetDateTime(nameof(Pago.Fecha)),
+                            Referencia = reader.GetString(nameof(Pago.Referencia)),
+                            Importe = reader.GetDouble(nameof(Pago.Importe)),
+                            Anulado = reader.GetString(nameof(Pago.Anulado)),
+                            IdContrato = reader.GetInt32(nameof(Pago.IdContrato)),
+                        });
+                    }
+
+                }
+            }
+        }
+        return pagos;
+    }
 
     public int AltaPago(Pago pago)
     {
@@ -108,6 +140,7 @@ public class RepositorioPago
         }
         return pagos;
     }
+    
 
     public int ModificarPago(Pago pago)
     {

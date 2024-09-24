@@ -70,6 +70,27 @@ public class PagoController : Controller
 
         return View(pago);
     }
+
+    [Authorize]
+    public IActionResult AgregarPago(int? id)
+    {
+        RepositorioContrato repoContrato = new RepositorioContrato();
+        var lista = repoContrato.GetContratos();
+        lista = lista.Where(x =>
+                x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
+                x.Anulado == false             // Contratos que NO están anulados
+            ).ToList();
+
+        ViewBag.Contratos = lista;
+        var pago = new Pago();
+
+        if (id.HasValue)
+        {
+            pago.IdContrato = id.Value;
+        }
+
+        return View(pago);
+    }
     [Authorize]
     public IActionResult Guardar(Pago pago, int? idContrato)
     {

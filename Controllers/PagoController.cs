@@ -45,7 +45,7 @@ public class PagoController : Controller
     }
     [Authorize]
     public IActionResult Editar(int? id, int? idContrato)
-    {   List<string> Referencia = new List<string>{"CANCELACION", "COMISION","CUOTA", "MULTA"};
+    {   List<string> Referencia = new List<string>{ "COMISION","CUOTA", "MULTA"};
         ViewBag.Referencia = Referencia;
     
         RepositorioContrato repoContrato = new RepositorioContrato();
@@ -82,7 +82,7 @@ public class PagoController : Controller
                 x.FechaTerm > DateTime.Now &&  // Contratos cuya fecha de término es mayor a la fecha actual
                 x.Anulado == false             // Contratos que NO están anulados
             ).ToList();
-        List<string> Referencia = new List<string>{"CANCELACION", "COMISION","CUOTA", "MULTA"};
+        List<string> Referencia = new List<string>{"COMISION","CUOTA", "MULTA"};
         ViewBag.Referencia = Referencia;    
 
         ViewBag.Contratos = lista;

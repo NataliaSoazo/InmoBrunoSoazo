@@ -188,7 +188,7 @@ public class RepositorioUsuario
         }
         return 0;
     }
-          public int EditarAvatar(Usuario usuario)
+    public int EditarAvatar(Usuario usuario)
     {
         using (var connection = new MySqlConnection(ConnectionString))
         {
@@ -207,7 +207,7 @@ public class RepositorioUsuario
         }
         return 0;
     }
-     public int EditarClave(Usuario usuario)
+    public int EditarClave(Usuario usuario)
     {
         using (var connection = new MySqlConnection(ConnectionString))
         {
@@ -318,6 +318,54 @@ public class RepositorioUsuario
             }
         }
         return usuario;
+    }
+
+
+    public IList<Usuario> ObtenerPorNombreOCorreo(string nombreOCorreo)
+    {
+        var res = new List<Usuario>();
+        nombreOCorreo = "%" + nombreOCorreo + "%"; // Usar comodines para la búsqueda parcial
+
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT u.{nameof(Usuario.Id)}, u.{nameof(Usuario.Nombre)}, u.{nameof(Usuario.Apellido)}, 
+                            u.{nameof(Usuario.Correo)}, u.{nameof(Usuario.Clave)}, u.{nameof(Usuario.AvatarURL)}, 
+                            r.{nameof(Rol.rol)}, r.{nameof(Rol.Numero)}  
+                    FROM usuarios u 
+                    INNER JOIN roles r ON u.{nameof(Usuario.Rol)} = r.{nameof(Rol.Numero)}
+                    WHERE u.{nameof(Usuario.Nombre)} LIKE @nombreOCorreo 
+                    OR u.{nameof(Usuario.Correo)} LIKE @nombreOCorreo";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue($"@nombreOCorreo", nombreOCorreo);
+                command.CommandType = CommandType.Text;
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var u = new Usuario
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal(nameof(Usuario.Id))),
+                            Nombre = reader.GetString(reader.GetOrdinal(nameof(Usuario.Nombre))),
+                            Apellido = reader.GetString(reader.GetOrdinal(nameof(Usuario.Apellido))),
+                            Correo = reader.GetString(reader.GetOrdinal(nameof(Usuario.Correo))),
+                            Clave = reader.GetString(reader.GetOrdinal(nameof(Usuario.Clave))),
+                            AvatarURL = reader.GetString(reader.GetOrdinal(nameof(Usuario.AvatarURL))),
+                            Datos = new Rol
+                            {
+                                Numero = reader.GetInt32(reader.GetOrdinal(nameof(Rol.Numero))),
+                                rol = reader.GetString(reader.GetOrdinal(nameof(Rol.rol))),
+                            }
+                        };
+                        res.Add(u);
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 }
 

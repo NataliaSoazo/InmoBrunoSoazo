@@ -428,4 +428,20 @@ public class UsuarioController : Controller
         return View("Editar", u);
     }
 
+    [Authorize(Policy = "Administrador")]
+    public IActionResult BuscarUsuario(string buscar)
+    {
+        try
+        {
+            RepositorioUsuario ru = new RepositorioUsuario();
+            IList<Usuario> usuario = ru.ObtenerPorNombreOCorreo(buscar);
+            return View("Index", usuario);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Ocurrio un error al buscar el usuario";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
 }

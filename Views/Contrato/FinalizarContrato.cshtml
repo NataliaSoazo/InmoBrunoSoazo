@@ -6,7 +6,7 @@
 
 
 
-<div class="container justify-content-center  col-6" id="table">
+<div class="container justify-content-center  col-6 p-3" id="table" >
     <h4 class="text-center">Liquidacion por finalización</h4>
     <hr />
     <dl class="row ">
@@ -29,28 +29,39 @@
         <dd class="col-6 ">
             @Html.DisplayFor(model => model.FechaTerm)
         </dd>
-       
-         <dt class="col-6">
-            MULTA CORRESPONDIENTE
-        </dt>
-        <dd class="col-6">
-         @if (ViewBag.Multa != null) {
-                 <p>@ViewBag.Multa</p>
-                }
-        </dd>
-       <div class="col-6 " id ="table">    
+       <div class="col-10 " id ="table">    
          <div class="col ">
-        <form asp-action="Finalizar" method="post">
+        <form asp-action="Calcular">
               <div class="form-group col-8">
                 <label asp-for="FechaFinalizacion" class="control-label"></label>
-                <input asp-for="FechaFinalizacion" class="form-control" id="fechaInicio" />
+                <input asp-for="FechaFinalizacion" class="form-control" id="fechaInicio" required/>
                 <span asp-validation-for="FechaFinalizacion" class="text-danger"></span>
             </div>
             <input type="hidden" name="id" value="@Model.Id" />
                <div class="form-group p-5" >
-                <input type="submit" value="Finaliza Contrato" class="btn btn-danger" />
+                <input type="submit" value="Calcular Multa" class="btn btn-warning" />
             </div>
         </form>
+        
+        <dd class="col-6">
+         @if(ViewBag.Deuda < 0 || ViewBag.Deuda == null){
+             @if (ViewBag.Multa != null) {
+                  <h5>MULTA CORRESPONDIENTE</h5>
+                 <h5>$ @ViewBag.Multa</h5>
+                  <a asp-controller="Pago" asp-action="agregarpago" asp-route-id="@Model.Id" title="Agregar pago"><i class="fa fa-plus" style="font-size:25px;" id="agregar"></i>   Pagar Multa</a>
+                <div>
+             <form asp-action="Finalizar">
+            <input type="hidden" name="id" value="@Model.Id" />
+               <div class="form-group p-5" >
+                <input type="submit" value="Finalizar contrato" class="btn btn-danger" />    
+            </div>
+        </form>
+                </div>
+                }
+         }else{
+            <p >El contrato posee @ViewBag.Deuda meses de deuda, no puede cancelar el contrato</p>
+         }
+        </dd>
     </div>
 
         @if (ViewBag.UserRole == "ADMINISTRADOR")

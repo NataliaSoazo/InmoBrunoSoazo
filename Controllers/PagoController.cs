@@ -111,7 +111,7 @@ public class PagoController : Controller
             if (pago.Id > 0)
             {
                 rp.ModificarPago(pago);
-                  return RedirectToAction("PagosContrato", pago.Id);
+                   return RedirectToAction(nameof(Index));
             }
             else
             {

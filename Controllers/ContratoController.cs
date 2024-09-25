@@ -226,12 +226,9 @@ public class ContratoController : Controller
     
     public IActionResult FinalizarContrato(int id)
     {
-        
         RepositorioContrato rc = new RepositorioContrato();
         var i = rc.GetContrato(id);
        if(!i.Anulado){
-        var calcularMulta = CalcularMulta(i);
-        ViewBag.Multa = calcularMulta;   
         return View(i);
        }
        else{
@@ -240,26 +237,47 @@ public class ContratoController : Controller
        }
     }
     [HttpPost]
-     public IActionResult Finalizar(int id)
+     public IActionResult Calcular(int id, DateTime FechaFinalizacion)
+    {    RepositorioContrato repoContrato = new RepositorioContrato();
+         var i= repoContrato.GetContrato(id);
+
+         var fechaValida = ValidarFecha( id, FechaFinalizacion);
+        if(!fechaValida){
+        ViewBag.Error = "Ingrese una Fecha válida";
+         return View("FinalizarContrato", i);
+        }
+       else{
+        var deuda = Adeuda(i);
+        var multa = CalcularMulta(i, FechaFinalizacion);
+        ViewBag.Deuda = deuda;
+        ViewBag.Multa = multa;
+         return View("FinalizarContrato", i);
+       }
+    }
+    public Boolean ValidarFecha(int idContrato, DateTime fechaIngresada){
+        RepositorioContrato repoContrato = new RepositorioContrato();
+         var contrato= repoContrato.GetContrato(idContrato);
+         if(fechaIngresada >= DateTime.Now && fechaIngresada<contrato.FechaTerm){
+            return true;
+         }else
+           return false;
+    }
+
+       public IActionResult Finalizar(int id, double Multa)
     {   
          RepositorioContrato rc = new RepositorioContrato();
         var contrato = rc.GetContrato(id);
-        var i = rc.GetContrato(id);
-        var deuda = Adeuda(i);
-        if(deuda>0){
-         ViewBag.Error = "El contrato tiene " + deuda + " meses de deudas, no se puede finalizar";
-         return View("FinalizarContrato", i);
-        }
-        if (YaPagoMulta(i)){
-            rc.FinalizarContrato(i);
+         var deuda = Adeuda(contrato);
+        if (YaPagoMulta(contrato, Multa) && deuda <=0){
+            rc.FinalizarContrato(contrato);
            return RedirectToAction(nameof(Index));
         }
         else{
               ViewBag.error = "Debes asentar la multa correspondiente para finalizar el contrato."; 
-             return View("FinalizarContrato", i);
+             return View("FinalizarContrato", contrato);
         }
         
-    }
+    } 
     
     private  int Adeuda(Contrato i){
         RepositorioPago rp = new RepositorioPago();
@@ -288,11 +306,11 @@ public class ContratoController : Controller
 
         
     }
-    public double CalcularMulta(Contrato i){
+    public double CalcularMulta(Contrato i, DateTime fFinalizacion){
         RepositorioContrato rp = new RepositorioContrato();
         var contrato = rp.GetContrato(i.Id);
-        var aniosFaltantes = contrato.FechaTerm.Year-DateTime.Now.Year;
-        var mesesFaltantes = contrato.FechaTerm.Month -DateTime.Now.Month;
+        var aniosFaltantes = contrato.FechaTerm.Year-fFinalizacion.Year;
+        var mesesFaltantes = contrato.FechaTerm.Month -fFinalizacion.Month;
         var tiempoFaltante = aniosFaltantes* 12 + mesesFaltantes;
 
         var aniosAcordados = contrato.FechaTerm.Year-contrato.FechaInicio.Year;
@@ -308,9 +326,8 @@ public class ContratoController : Controller
         return multa;
     }
 
-    public Boolean YaPagoMulta(Contrato i){
+    public Boolean YaPagoMulta(Contrato i, Double Multa){
         Boolean  pago = false;
-        var multa = CalcularMulta(i);
         RepositorioPago rp = new RepositorioPago();
         List<Pago> cuotas = new List<Pago>();
         var lista = rp.ObtenerPagosPorContrato(i.Id);
@@ -318,12 +335,12 @@ public class ContratoController : Controller
              foreach (var item in (List<Pago>) lista)
           
                     {
-                       if(item.Referencia =="MULTA" && item.Importe == multa){
+                       if(item.Referencia =="MULTA" && item.Importe == Multa){
                         pago = true;
                        }
                     }
              }
              return pago;
-    }         
+    }          
 }
 

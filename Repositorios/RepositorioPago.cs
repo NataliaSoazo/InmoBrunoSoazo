@@ -16,7 +16,7 @@ public class RepositorioPago
         var pagos = new List<Pago>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
+            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
                 FROM pagos p";
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -28,7 +28,6 @@ public class RepositorioPago
                         pagos.Add(new Pago
                         {
                             Id = reader.GetInt32(nameof(Pago.Id)),
-                            Numero = reader.GetInt32(nameof(Pago.Numero)),
                             Fecha = reader.GetDateTime(nameof(Pago.Fecha)),
                             Referencia = reader.GetString(nameof(Pago.Referencia)),
                             Importe = reader.GetDouble(nameof(Pago.Importe)),
@@ -47,7 +46,7 @@ public class RepositorioPago
         var pagos = new List<Pago>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
+            string sql = $@"SELECT p.{nameof(Pago.Id)},  {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}
                 FROM pagos p
                  WHERE p.{nameof(Pago.IdContrato)} = @{nameof(Pago.IdContrato)};";
             using (var command = new MySqlCommand(sql, connection))
@@ -60,7 +59,6 @@ public class RepositorioPago
                         pagos.Add(new Pago
                         {
                             Id = reader.GetInt32(nameof(Pago.Id)),
-                            Numero = reader.GetInt32(nameof(Pago.Numero)),
                             Fecha = reader.GetDateTime(nameof(Pago.Fecha)),
                             Referencia = reader.GetString(nameof(Pago.Referencia)),
                             Importe = reader.GetDouble(nameof(Pago.Importe)),
@@ -80,13 +78,11 @@ public class RepositorioPago
         int id = 0;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"INSERT INTO pagos ( {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}) 
-                        VALUES (@{nameof(Pago.Numero)}, @{nameof(Pago.Fecha)}, @{nameof(Pago.Referencia)}, @{nameof(Pago.Importe)}, @{nameof(Pago.Anulado)}, @{nameof(Pago.IdContrato)}, @{nameof(Pago.IdUsuarioComenzo)}, @{nameof(Pago.IdUsuarioTermino)});           
+            string sql = $@"INSERT INTO pagos ({nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}) 
+                        VALUES (@{nameof(Pago.Fecha)}, @{nameof(Pago.Referencia)}, @{nameof(Pago.Importe)}, @{nameof(Pago.Anulado)}, @{nameof(Pago.IdContrato)}, @{nameof(Pago.IdUsuarioComenzo)}, @{nameof(Pago.IdUsuarioTermino)});           
                         SELECT LAST_INSERT_ID();";
             using (var command = new MySqlCommand(sql, connection))
             {
-
-                command.Parameters.AddWithValue($"@{nameof(Pago.Numero)}", pago.Numero);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Fecha)}", pago.Fecha);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Referencia)}", pago.Referencia);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);
@@ -109,7 +105,7 @@ public class RepositorioPago
         Pago? pagos = null;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            string sql = $@"SELECT p.{nameof(Pago.Id)}, {nameof(Pago.Numero)}, {nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}
+            string sql = $@"SELECT p.{nameof(Pago.Id)},{nameof(Pago.Fecha)}, {nameof(Pago.Referencia)}, {nameof(Pago.Importe)}, {nameof(Pago.Anulado)}, {nameof(Pago.IdContrato)}, {nameof(Pago.IdUsuarioComenzo)}, {nameof(Pago.IdUsuarioTermino)}
                 FROM pagos p
                 WHERE p.{nameof(Pago.Id)} = @{nameof(Pago.Id)};";
             using (var command = new MySqlCommand(sql, connection))
@@ -123,7 +119,6 @@ public class RepositorioPago
                         pagos = new Pago
                         {
                             Id = reader.GetInt32(reader.GetOrdinal(nameof(Pago.Id))),
-                            Numero = reader.GetInt32(reader.GetOrdinal(nameof(Pago.Numero))),
                             Fecha = reader.GetDateTime(reader.GetOrdinal(nameof(Pago.Fecha))),
                             Referencia = reader.GetString(reader.GetOrdinal(nameof(Pago.Referencia))),
                             Importe = reader.GetDouble(reader.GetOrdinal(nameof(Pago.Importe))),
@@ -147,7 +142,6 @@ public class RepositorioPago
         using (var connection = new MySqlConnection(ConnectionString))
         {
             string sql = $@"UPDATE pagos SET 
-                            {nameof(Pago.Numero)} = @{nameof(Pago.Numero)}, 
                             {nameof(Pago.Fecha)} = @{nameof(Pago.Fecha)},
                             {nameof(Pago.Referencia)} = @{nameof(Pago.Referencia)},
                             {nameof(Pago.Importe)} = @{nameof(Pago.Importe)},
@@ -156,7 +150,6 @@ public class RepositorioPago
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue($"@{nameof(Pago.Numero)}", pago.Numero);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Fecha)}", pago.Fecha);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Referencia)}", pago.Referencia);
                 command.Parameters.AddWithValue($"@{nameof(Pago.Importe)}", pago.Importe);

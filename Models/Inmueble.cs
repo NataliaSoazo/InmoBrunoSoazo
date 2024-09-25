@@ -45,6 +45,7 @@ public class Inmueble
         public class TipoInmueble{
              [Display(Name = "CÓDIGO")]
             public int Id { get; set; }
+             [Display(Name = "TIPO")]
             public string Tipo { get; set; }
         }
 

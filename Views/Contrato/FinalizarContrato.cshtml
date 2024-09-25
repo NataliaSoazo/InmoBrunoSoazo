@@ -7,7 +7,7 @@
 
 
 <div class="container justify-content-center  col-6" id="table">
-    <h4 class="text-center">Detalles del Contrato</h4>
+    <h4 class="text-center">Liquidacion por finalización</h4>
     <hr />
     <dl class="row ">
         <dt class="col-6 ">
@@ -16,42 +16,42 @@
         <dd class="col-6 ">
             @Html.DisplayFor(model => model.Id)
         </dd>
-        <dt class="col-6 ">
-            @Html.DisplayNameFor(model => model.FechaInicio)
-        </dt>
-        <dd class="col-6 ">
-            @Html.DisplayFor(model => model.FechaInicio)
-        </dd>
-        <dt class="col-6 ">
-            @Html.DisplayNameFor(model => model.FechaTerm)
-        </dt>
-        <dd class="col-6 ">
-            @Html.DisplayFor(model => model.FechaTerm)
-        </dd>
+        
         <dt class="col-6 ">
             @Html.DisplayNameFor(model => model.MontoMensual)
         </dt>
         <dd class="col-6 ">
             @Html.DisplayFor(model => model.MontoMensual)
         </dd>
-        <dt class="col-6 ">
-            DATOS DEL INQUILINO
+         <dt class="col-6 ">
+          FECHA DE TERMINO DEL CONTRATO
+        </dt>
+        <dd class="col-6 ">
+            @Html.DisplayFor(model => model.FechaTerm)
+        </dd>
+       
+         <dt class="col-6">
+            MULTA CORRESPONDIENTE
         </dt>
         <dd class="col-6">
-            CODIGO @Model.IdInquilino, @Model.Arrendatario.Apellido @Model.Arrendatario.Nombre
+         @if (ViewBag.Multa != null) {
+                 <p>@ViewBag.Multa</p>
+                }
         </dd>
-        <dt class="col-6">
-            DATOS DEL INMUEBLE
-        </dt>
-        <dd class="col-6">
-            CODIGO @Model.IdInmueble, @Model.Datos.Direccion @Model.Datos.Uso
-        </dd>
-        <dt class="col-6">
-            CUOTAS ADEUDADAS
-        </dt>
-        <dd class="col-6">
-            @ViewBag.Cuotas
-        </dd>
+       <div class="col-6 " id ="table">    
+         <div class="col ">
+        <form asp-action="Finalizar" method="post">
+              <div class="form-group col-8">
+                <label asp-for="FechaFinalizacion" class="control-label"></label>
+                <input asp-for="FechaFinalizacion" class="form-control" id="fechaInicio" />
+                <span asp-validation-for="FechaFinalizacion" class="text-danger"></span>
+            </div>
+            <input type="hidden" name="id" value="@Model.Id" />
+               <div class="form-group p-5" >
+                <input type="submit" value="Finaliza Contrato" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
 
         @if (ViewBag.UserRole == "ADMINISTRADOR")
         {
@@ -75,7 +75,6 @@
                 <dd class="col-6">
                     @ViewBag.UsuarioT.Id @ViewBag.UsuarioT.Nombre @ViewBag.UsuarioT.Apellido
                 </dd>
-                
             }
         }
     </dl>

@@ -7,12 +7,6 @@ namespace PROYECTO_BRUNO_SOAZO.Models
     {
         [Display(Name = "CÓDIGO")]
         public int Id { get; set; }
-
-        [Display(Name = "NÚMERO")]
-        [Required(ErrorMessage = "Campo obligatorio")]
-        [Range(1, int.MaxValue, ErrorMessage = "El número debe ser mayor a 0")]
-        public int Numero { get; set; }
-
         [Required(ErrorMessage = "Campo obligatorio")]
         [DataType(DataType.Date)]
         [Display(Name = "FECHA")]

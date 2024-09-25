@@ -18,44 +18,7 @@
                 <label class="control-label">CÓDIGO</label>
                 <input name="Id" class="form-control" value="@id" readonly />
             </div>
-            <div class="form-group col-2">
-                <label class="control-label">NÚMERO</label>
-                @if(id > 0 ){
-                    <input asp-for="Numero" class="form-control" readonly />
-                } else {
-                    <input asp-for="Numero" class="form-control" />
-                }
-                <span asp-validation-for="Numero" class="text-danger"></span>
-            </div>
-            <div class="form-group col-5">
-                <label asp-for="Fecha" class="control-label"></label>
-                @if(id > 0){
-                    <input asp-for="Fecha" class="form-control" readonly />
-                } else {
-                    <input asp-for="Fecha" class="form-control" />
-                }
-                <span asp-validation-for="Fecha" class="text-danger"></span>
-            </div>
-          <div class="form-group col-3">
-                <label asp-for="Referencia" class="control-label"></label>
-                <select class="form-control" name="Referencia" id= "">
-                    @foreach (var item in (List<string>)ViewBag.Referencia)
-                    {
-                        @:<option @(item== Model?.Referencia ? "selected" : "") value="@item"> @item</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group col-4">
-                <label asp-for="Importe" class="control-label"></label>
-                @if (id > 0 ){
-                    <input asp-for="Importe" class="control-label" readonly>
-                } else {
-                    <input asp-for="Importe" class="control-label">
-                }
-                <span asp-validation-for="Importe" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group col-4">
+             <div class="form-group col-3">
                 <label asp-for="IdContrato" class="control-label"></label>
                 @if (Model != null && Model.IdContrato > 0)
                 {
@@ -73,6 +36,34 @@
                     </select>
                 }
             </div>
+            <div class="form-group col-3">
+                <label asp-for="Fecha" class="control-label"></label>
+                @if(id > 0){
+                    <input asp-for="Fecha" class="form-control" readonly />
+                } else {
+                    <input asp-for="Fecha" class="form-control" />
+                }
+                <span asp-validation-for="Fecha" class="text-danger"></span>
+            </div>
+          <div class="form-group col-5">
+                <label asp-for="Referencia" class="control-label"></label>
+                <select class="form-control" name="Referencia" id= "">
+                    @foreach (var item in (List<string>)ViewBag.Referencia)
+                    {
+                        @:<option @(item== Model?.Referencia ? "selected" : "") value="@item"> @item</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-3">
+                <label asp-for="Importe" class="control-label"></label>
+                @if (id > 0 ){
+                    <input asp-for="Importe" class="form-control" readonly>
+                } else {
+                    <input asp-for="Importe" class="form-control">
+                }
+                <span asp-validation-for="Importe" class="text-danger"></span>
+            </div>
+           
             <div class="form-group">
                 <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>

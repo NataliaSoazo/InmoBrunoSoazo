@@ -31,8 +31,9 @@ namespace PROYECTO_BRUNO_SOAZO.Models
         public int IdInquilino { get; set; }
 
         [Required(ErrorMessage = "Campo obligatorio")]
-        public Inquilino? Arrendatario { get; set; }
+         [Display(Name = "ARRENDATARIO")]
 
+        public Inquilino? Arrendatario { get; set; }
         [Required(ErrorMessage = "Campo obligatorio")]
         [Display(Name = "DATOS DEL INMUEBLE")]
         public int IdInmueble { get; set; }
@@ -47,5 +48,8 @@ namespace PROYECTO_BRUNO_SOAZO.Models
         public bool Anulado { get; set; }
 
         public Inmueble? Datos { get; set; }
+        [Display(Name = "FECHA DE FINALIZACION A PACTAR")]
+        [DataType(DataType.Date)]
+        public DateTime FechaFinalizacion { get; set; }
     }
 }

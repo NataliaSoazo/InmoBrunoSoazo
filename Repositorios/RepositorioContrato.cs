@@ -233,5 +233,25 @@ public class RepositorioContrato
         return inmueblesDisponibles;
     }
 
+    public int FinalizarContrato(Contrato contrato)
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            string sql = $@"UPDATE contratos SET 
+                    {nameof(Contrato.FechaFinalizacion)} = @{nameof(Contrato.FechaFinalizacion)},
+                  
+                WHERE {nameof(Contrato.Id)} = @{nameof(Contrato.Id)}";
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue($"@{nameof(Contrato.Id)}", contrato.Id);
+                command.Parameters.AddWithValue($"@{nameof(Contrato.FechaFinalizacion)}", contrato.FechaFinalizacion);
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+            }
+        }
+        return 0;
+    }
 
 }

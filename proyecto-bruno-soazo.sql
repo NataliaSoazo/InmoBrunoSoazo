@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-09-2024 a las 20:17:32
+-- Tiempo de generación: 26-09-2024 a las 00:27:53
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -36,17 +36,20 @@ CREATE TABLE `contratos` (
   `IdInmueble` int(11) NOT NULL,
   `Anulado` tinyint(1) NOT NULL,
   `IdUsuarioComenzo` int(11) NOT NULL,
-  `idUsuarioTermino` int(11) DEFAULT NULL
+  `idUsuarioTermino` int(11) DEFAULT NULL,
+  `FechaFinalizacion` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `contratos`
 --
 
-INSERT INTO `contratos` (`Id`, `FechaInicio`, `FechaTerm`, `MontoMensual`, `IdInquilino`, `IdInmueble`, `Anulado`, `IdUsuarioComenzo`, `idUsuarioTermino`) VALUES
-(13, '2024-02-02', '2029-02-02', 123456, 1, 1, 1, 10, 10),
-(14, '2024-02-02', '2029-02-02', 22222, 11, 2, 1, 10, 10),
-(15, '2024-09-21', '2025-09-21', 123456, 1, 1, 0, 10, NULL);
+INSERT INTO `contratos` (`Id`, `FechaInicio`, `FechaTerm`, `MontoMensual`, `IdInquilino`, `IdInmueble`, `Anulado`, `IdUsuarioComenzo`, `idUsuarioTermino`, `FechaFinalizacion`) VALUES
+(13, '2024-02-02', '2029-02-02', 123456, 1, 1, 1, 10, 10, NULL),
+(14, '2024-02-02', '2029-02-02', 22222, 11, 2, 1, 10, 10, NULL),
+(15, '2024-09-21', '2025-09-21', 300000, 1, 1, 0, 10, NULL, NULL),
+(16, '2024-07-01', '2025-11-24', 200000, 12, 6, 0, 5, NULL, NULL),
+(17, '2023-09-24', '2025-09-24', 200000, 8, 5, 0, 5, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -122,7 +125,6 @@ INSERT INTO `inquilinos` (`Id`, `Nombre`, `Apellido`, `Dni`, `Email`, `Telefono`
 
 CREATE TABLE `pagos` (
   `Id` int(11) NOT NULL,
-  `Numero` int(11) NOT NULL,
   `Fecha` date NOT NULL,
   `Referencia` varchar(20) NOT NULL,
   `Importe` double NOT NULL,
@@ -136,8 +138,14 @@ CREATE TABLE `pagos` (
 -- Volcado de datos para la tabla `pagos`
 --
 
-INSERT INTO `pagos` (`Id`, `Numero`, `Fecha`, `Referencia`, `Importe`, `Anulado`, `IdContrato`, `IdUsuarioComenzo`, `idUsuarioTermino`) VALUES
-(12, 1, '2024-09-21', 'comision', 12333, 'SI', 15, 10, 10);
+INSERT INTO `pagos` (`Id`, `Fecha`, `Referencia`, `Importe`, `Anulado`, `IdContrato`, `IdUsuarioComenzo`, `idUsuarioTermino`) VALUES
+(12, '2024-09-21', 'comision', 12333, 'SI', 15, 10, 10),
+(13, '2024-08-10', 'CUOTA', 200000, 'NO', 15, 5, NULL),
+(15, '2024-09-24', 'CUOTA', 200000, 'NO', 16, 5, NULL),
+(16, '2024-09-10', 'CUOTA', 200000, 'NO', 16, 5, NULL),
+(17, '2024-09-29', 'CUOTA', 200000, 'NO', 16, 5, NULL),
+(18, '0001-01-01', 'CUOTA', 200000, 'NO', 16, 5, NULL),
+(19, '2024-09-25', 'MULTA', 200000, 'NO', 16, 5, NULL);
 
 -- --------------------------------------------------------
 
@@ -235,10 +243,12 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`Id`, `Nombre`, `Apellido`, `Correo`, `Clave`, `Rol`, `AvatarURL`) VALUES
+(1, 'CARLOS', 'PEREZ', 'we332@gmial.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 1, '/ImgSubidas\\anonimo.jpg'),
+(2, 'MARCOS', 'MORALES', 'mmorales@gmail.com', 'aHaNIdWhIn/KUG4lz+NUpsu+abT3qjSn0BLpdfFBIo4=', 1, '/ImgSubidas\\6av_2.jfif'),
+(4, 'JESUS', 'GONZALEZ', 'je@gmail.com', 'aHaNIdWhIn/KUG4lz+NUpsu+abT3qjSn0BLpdfFBIo4=', 1, '/ImgSubidas\\6av_4.jfif'),
+(5, 'NATALIA ', 'SOAZO', 'natalia.s.laboral@gmail.com', 'aHaNIdWhIn/KUG4lz+NUpsu+abT3qjSn0BLpdfFBIo4=', 2, '/ImgSubidas\\4av_5.jfif'),
 (7, 'LAURA', 'SUAREZ', 'lauraperez12@gmail.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 1, '/ImgSubidas\\anonimo.jpg'),
-(9, 'GIULIETTA', 'BRUNO', 'jes@gmail.com', 'orG0/zZ0z0h2Zv102mCFIWuW7ShFJcquhvt2i01OeuY=', 2, '/ImgSubidas\\anonimo.jpg'),
-(10, 'GIULIETTA', 'BRUNO', 'giulietta133@gmail.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 2, '/ImgSubidas\\anonimo.jpg'),
-(11, 'CARLOS', 'PEREZ', 'we332@gmial.com', 'Mhc3bPUHnAoj11+xusvyNM8BJsg3P3qeevTViybLJ/Q=', 1, '/ImgSubidas\\anonimo.jpg');
+(9, 'GIULIETTA', 'BRUNO', 'jes@gmail.com', 'orG0/zZ0z0h2Zv102mCFIWuW7ShFJcquhvt2i01OeuY=', 2, '/ImgSubidas\\anonimo.jpg');
 
 --
 -- Índices para tablas volcadas
@@ -248,50 +258,12 @@ INSERT INTO `usuarios` (`Id`, `Nombre`, `Apellido`, `Correo`, `Clave`, `Rol`, `A
 -- Indices de la tabla `contratos`
 --
 ALTER TABLE `contratos`
-  ADD PRIMARY KEY (`Id`),
-  ADD KEY `IdInquilino` (`IdInquilino`),
-  ADD KEY `IdInmueble` (`IdInmueble`),
-  ADD KEY `idUsuarioTermino` (`idUsuarioTermino`),
-  ADD KEY `IdUsuarioComenzo` (`IdUsuarioComenzo`);
-
---
--- Indices de la tabla `inmuebles`
---
-ALTER TABLE `inmuebles`
-  ADD PRIMARY KEY (`Id`),
-  ADD KEY `Propietarioid` (`Propietarioid`);
-
---
--- Indices de la tabla `inquilinos`
---
-ALTER TABLE `inquilinos`
   ADD PRIMARY KEY (`Id`);
 
 --
 -- Indices de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  ADD PRIMARY KEY (`Id`),
-  ADD KEY `IdContrato` (`IdContrato`),
-  ADD KEY `IdUsuarioComenzo` (`IdUsuarioComenzo`),
-  ADD KEY `idUsuarioTermino` (`idUsuarioTermino`);
-
---
--- Indices de la tabla `propietarios`
---
-ALTER TABLE `propietarios`
-  ADD PRIMARY KEY (`Id`);
-
---
--- Indices de la tabla `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`Numero`);
-
---
--- Indices de la tabla `tipoinmuebles`
---
-ALTER TABLE `tipoinmuebles`
   ADD PRIMARY KEY (`Id`);
 
 --
@@ -308,76 +280,19 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `contratos`
 --
 ALTER TABLE `contratos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
--- AUTO_INCREMENT de la tabla `inmuebles`
---
-ALTER TABLE `inmuebles`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT de la tabla `inquilinos`
---
-ALTER TABLE `inquilinos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
--- AUTO_INCREMENT de la tabla `propietarios`
---
-ALTER TABLE `propietarios`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT de la tabla `roles`
---
-ALTER TABLE `roles`
-  MODIFY `Numero` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT de la tabla `tipoinmuebles`
---
-ALTER TABLE `tipoinmuebles`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `contratos`
---
-ALTER TABLE `contratos`
-  ADD CONSTRAINT `contratos_ibfk_1` FOREIGN KEY (`IdInquilino`) REFERENCES `inquilinos` (`Id`),
-  ADD CONSTRAINT `contratos_ibfk_2` FOREIGN KEY (`IdInmueble`) REFERENCES `inmuebles` (`Id`),
-  ADD CONSTRAINT `contratos_ibfk_3` FOREIGN KEY (`idUsuarioTermino`) REFERENCES `usuarios` (`Id`),
-  ADD CONSTRAINT `contratos_ibfk_4` FOREIGN KEY (`IdUsuarioComenzo`) REFERENCES `usuarios` (`Id`);
-
---
--- Filtros para la tabla `inmuebles`
---
-ALTER TABLE `inmuebles`
-  ADD CONSTRAINT `inmuebles_ibfk_1` FOREIGN KEY (`Propietarioid`) REFERENCES `propietarios` (`Id`);
-
---
--- Filtros para la tabla `pagos`
---
-ALTER TABLE `pagos`
-  ADD CONSTRAINT `pagos_ibfk_1` FOREIGN KEY (`IdContrato`) REFERENCES `contratos` (`Id`),
-  ADD CONSTRAINT `pagos_ibfk_2` FOREIGN KEY (`IdUsuarioComenzo`) REFERENCES `usuarios` (`Id`),
-  ADD CONSTRAINT `pagos_ibfk_3` FOREIGN KEY (`idUsuarioTermino`) REFERENCES `usuarios` (`Id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

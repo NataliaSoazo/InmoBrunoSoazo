@@ -248,7 +248,7 @@ public class ContratoController : Controller
         if (!fechaValida)
         {
             ViewBag.Error = "Ingrese una Fecha válida";
-            return View("FinalizarContrato", i, );
+            return View("FinalizarContrato", i);
         }
         else if (YaPagoMulta(i, multa) && deuda <= 0)
         {   ViewBag.Mensaje="Usted ya registra la multa correspondiente paga";

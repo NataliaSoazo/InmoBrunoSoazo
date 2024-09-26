@@ -248,7 +248,7 @@ public class ContratoController : Controller
         if (!fechaValida)
         {
             ViewBag.Error = "Ingrese una Fecha válida";
-            return View("FinalizarContrato", i, );
+            return View("FinalizarContrato", i);
         }
         else if (YaPagoMulta(i, multa) && deuda <= 0)
         {   ViewBag.Mensaje="Usted ya registra la multa correspondiente paga";
@@ -281,11 +281,11 @@ public class ContratoController : Controller
         if(contrato.FechaFinalizacion == null){
         contrato.FechaFinalizacion = FechaFinalizacion;
         rc.FinalizarContrato(contrato);
-        ViewBag.Mensaje= "Contrato Finalizado correctamente";
+        ViewBag.Mensaje ="Contrato Finalizado correctamente";
         return RedirectToAction(nameof(Index));
         }
         else{
-            ViewBag.Error= "El contrato ya ha sido finalizado";
+            ViewBag.Error="El contrato ya ha sido finalizado";
              return RedirectToAction(nameof(Index));
         }
         

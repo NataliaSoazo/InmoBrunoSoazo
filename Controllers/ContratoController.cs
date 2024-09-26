@@ -12,7 +12,7 @@ public class ContratoController : Controller
     public ContratoController(ILogger<HomeController> logger)
     {
         _logger = logger;
-       
+
     }
     [Authorize]
     public IActionResult Index()
@@ -84,25 +84,25 @@ public class ContratoController : Controller
         try
         {
             RepositorioContrato rc = new RepositorioContrato();
-           // Boolean validado = rc.validarContrato(contrato);
+            // Boolean validado = rc.validarContrato(contrato);
             var usuario = ru.ObtenerPorEmail(User.Identity.Name);
-           // if (validado == true)
-           // {
+            // if (validado == true)
+            // {
 
-                if (contrato.Id > 0)
-                {
-                    rc.ModificarContrato(contrato);
-                    return RedirectToAction(nameof(Index));
-
-                }
-                else
-                    contrato.IdUsuarioComenzo = usuario.Id;
-                contrato.IdUsuarioTermino = null;
-                rc.AltaContrato(contrato);
+            if (contrato.Id > 0)
+            {
+                rc.ModificarContrato(contrato);
                 return RedirectToAction(nameof(Index));
-           // }
-           // else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
-           // return RedirectToAction(nameof(Index));
+
+            }
+            else
+                contrato.IdUsuarioComenzo = usuario.Id;
+            contrato.IdUsuarioTermino = null;
+            rc.AltaContrato(contrato);
+            return RedirectToAction(nameof(Index));
+            // }
+            // else TempData["Error"] = "El contrato debe tener una duración mínima de dos años.";
+            // return RedirectToAction(nameof(Index));
         }
         catch (System.Exception)
         {
@@ -223,26 +223,28 @@ public class ContratoController : Controller
         // Pasar el nuevo contrato a la vista
         return View("editar", nuevoContrato);
     }
-     [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult FinalizarContrato(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
         var i = rc.GetContrato(id);
-       if(!i.Anulado){
-        return View(i);
-       }
-       else{
-        TempData["Error"] = "El contrato está anulado";
-         return RedirectToAction(nameof(Index));
-       }
+        if (!i.Anulado)
+        {
+            return View(i);
+        }
+        else
+        {
+            TempData["Error"] = "El contrato está anulado";
+            return RedirectToAction(nameof(Index));
+        }
     }
     [HttpPost]
-     [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
     public IActionResult Calcular(int id, DateTime FechaFinalizacion)
     {
         RepositorioContrato repoContrato = new RepositorioContrato();
         var i = repoContrato.GetContrato(id);
-         var fechaValida = ValidarFecha(id, FechaFinalizacion);
+        var fechaValida = ValidarFecha(id, FechaFinalizacion);
         var deuda = Adeuda(i);
         var multa = CalcularMulta(i, FechaFinalizacion);
         if (!fechaValida)
@@ -251,7 +253,8 @@ public class ContratoController : Controller
             return View("FinalizarContrato", i);
         }
         else if (YaPagoMulta(i, multa) && deuda <= 0)
-        {   ViewBag.Mensaje="Usted ya registra la multa correspondiente paga";
+        {
+            ViewBag.Mensaje = "Usted ya registra la multa correspondiente paga";
             ViewBag.CalculoValidado = true;
             return View("FinalizarContrato", i);
         }
@@ -263,105 +266,122 @@ public class ContratoController : Controller
         }
 
     }
-          [Authorize(Policy = "Administrador")]
+    [Authorize(Policy = "Administrador")]
 
-    public Boolean ValidarFecha(int idContrato, DateTime fechaIngresada){
+    public Boolean ValidarFecha(int idContrato, DateTime fechaIngresada)
+    {
         RepositorioContrato repoContrato = new RepositorioContrato();
-         var contrato= repoContrato.GetContrato(idContrato);
-         if(fechaIngresada >= DateTime.Now.Date && fechaIngresada<contrato.FechaTerm){
+        var contrato = repoContrato.GetContrato(idContrato);
+        if (fechaIngresada >= DateTime.Now.Date && fechaIngresada < contrato.FechaTerm)
+        {
             return true;
-         }else
-           return false;
+        }
+        else
+            return false;
     }
-     [Authorize(Policy = "Administrador")]
-       public IActionResult Finalizar(int id, DateTime FechaFinalizacion)
-    {   
+    [Authorize(Policy = "Administrador")]
+    public IActionResult Finalizar(int id, DateTime FechaFinalizacion)
+    {
         RepositorioContrato rc = new RepositorioContrato();
         var contrato = rc.GetContrato(id);
-        if(contrato.FechaFinalizacion == null){
+        if(contrato.Anulado == false)
+        {
         contrato.FechaFinalizacion = FechaFinalizacion;
+        contrato.Anulado = true;
         rc.FinalizarContrato(contrato);
-        ViewBag.Mensaje ="Contrato Finalizado correctamente";
+        ViewBag.Mensaje = "Contrato Finalizado correctamente";
         return RedirectToAction(nameof(Index));
         }
-        else{
-            ViewBag.Error="El contrato ya ha sido finalizado";
-             return RedirectToAction(nameof(Index));
+        else
+        {
+            ViewBag.Error = "El contrato ya ha sido finalizado";
+            return View("FinalizarContrato", contrato);
         }
-        
-    } 
-    
-    public int Adeuda(Contrato i){
+
+    }
+
+    public int Adeuda(Contrato i)
+    {
         RepositorioPago rp = new RepositorioPago();
         List<Pago> cuotas = new List<Pago>();
         var lista = rp.ObtenerPagosPorContrato(i.Id);
-        int anosTranscurridos = DateTime.Now.Year- i.FechaInicio.Year;
+        int anosTranscurridos = DateTime.Now.Year - i.FechaInicio.Year;
         int mesesTranscurridos = DateTime.Now.Month - i.FechaInicio.Month;
-        int TiempoTranscurrido = anosTranscurridos* 12 + mesesTranscurridos;
-        
-         if(lista!=null){
-             foreach (var item in (List<Pago>) lista)
-          
-                    {
-                       if(item.Referencia =="CUOTA"){
-                        cuotas.Add(item);
-                       }
-                    }
-        
-        var deuda = TiempoTranscurrido-cuotas.Count();
-        return deuda;
-         }
-         else{
+        int TiempoTranscurrido = anosTranscurridos * 12 + mesesTranscurridos;
+
+        if (lista != null)
+        {
+            foreach (var item in (List<Pago>)lista)
+
+            {
+                if (item.Referencia == "CUOTA")
+                {
+                    cuotas.Add(item);
+                }
+            }
+
+            var deuda = TiempoTranscurrido - cuotas.Count();
+            return deuda;
+        }
+        else
+        {
             return mesesTranscurridos;
-         }
+        }
 
 
-        
+
     }
-         [Authorize(Policy = "Administrador")]
-         private  double CalcularMulta(Contrato i, DateTime fFinalizacion) {
-         RepositorioContrato rp = new RepositorioContrato();
-         var contrato = rp.GetContrato(i.Id);
-     
-         // Calculamos el tiempo acordado
-         var aniosAcordados = contrato.FechaTerm.Year - contrato.FechaInicio.Year;
-         var mesesAcordados = contrato.FechaTerm.Month - contrato.FechaInicio.Month;
-         var tiempoAcordado = aniosAcordados * 12 + mesesAcordados;
-     
-         // Calculamos el tiempo cumplido hasta la fecha de finalización
-         var aniosCumplidos = fFinalizacion.Year - contrato.FechaInicio.Year;
-         var mesesCumplidos = fFinalizacion.Month - contrato.FechaInicio.Month;
-         var tiempoCumplido = aniosCumplidos * 12 + mesesCumplidos;
-     
-         // Calculamos la multa
-         double multa;
-         var mitadTiempo = tiempoAcordado / 2;
-         
-         if (tiempoCumplido < mitadTiempo) {
-             multa = contrato.MontoMensual * 2; // Menos de la mitad, paga 2 meses
-         } else {
-             multa = contrato.MontoMensual; // Más de la mitad, paga 1 mes
-         }
-         
-         return multa;
+    [Authorize(Policy = "Administrador")]
+    private double CalcularMulta(Contrato i, DateTime fFinalizacion)
+    {
+        RepositorioContrato rp = new RepositorioContrato();
+        var contrato = rp.GetContrato(i.Id);
+
+        // Calculamos el tiempo acordado
+        var aniosAcordados = contrato.FechaTerm.Year - contrato.FechaInicio.Year;
+        var mesesAcordados = contrato.FechaTerm.Month - contrato.FechaInicio.Month;
+        var tiempoAcordado = aniosAcordados * 12 + mesesAcordados;
+
+        // Calculamos el tiempo cumplido hasta la fecha de finalización
+        var aniosCumplidos = fFinalizacion.Year - contrato.FechaInicio.Year;
+        var mesesCumplidos = fFinalizacion.Month - contrato.FechaInicio.Month;
+        var tiempoCumplido = aniosCumplidos * 12 + mesesCumplidos;
+
+        // Calculamos la multa
+        double multa;
+        var mitadTiempo = tiempoAcordado / 2;
+
+        if (tiempoCumplido < mitadTiempo)
+        {
+            multa = contrato.MontoMensual * 2; // Menos de la mitad, paga 2 meses
+        }
+        else
+        {
+            multa = contrato.MontoMensual; // Más de la mitad, paga 1 mes
+        }
+
+        return multa;
     }
 
-         [Authorize(Policy = "Administrador")]
-    private  Boolean YaPagoMulta(Contrato i, double multa ){
-        Boolean  pago = false;
+    [Authorize(Policy = "Administrador")]
+    private Boolean YaPagoMulta(Contrato i, double multa)
+    {
+        Boolean pago = false;
         RepositorioPago rp = new RepositorioPago();
         List<Pago> cuotas = new List<Pago>();
         var lista = rp.ObtenerPagosPorContrato(i.Id);
-        if(lista!=null){
-             foreach (var item in (List<Pago>) lista)
-          
-                    {
-                       if(item.Referencia =="MULTA" && item.Importe == multa ){
-                        pago = true;
-                       }
-                    }
-             }
-             return pago;
-    }          
+        if (lista != null)
+        {
+            foreach (var item in (List<Pago>)lista)
+
+            {
+                if (item.Referencia == "MULTA" && item.Importe == multa)
+                {
+                    pago = true;
+                }
+            }
+        }
+        return pago;
+    }
 }
 

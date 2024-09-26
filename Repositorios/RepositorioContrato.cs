@@ -238,12 +238,13 @@ public class RepositorioContrato
         using (var connection = new MySqlConnection(ConnectionString))
         {
             string sql = $@"UPDATE contratos SET 
-                    {nameof(Contrato.FechaFinalizacion)} = @{nameof(Contrato.FechaFinalizacion)}  
+                    {nameof(Contrato.FechaFinalizacion)} = @{nameof(Contrato.FechaFinalizacion)},{nameof(Contrato.Anulado)} = true      
                 WHERE {nameof(Contrato.Id)} = @{nameof(Contrato.Id)}";
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue($"@{nameof(Contrato.Id)}", contrato.Id);
                 command.Parameters.AddWithValue($"@{nameof(Contrato.FechaFinalizacion)}", contrato.FechaFinalizacion);
+                command.Parameters.AddWithValue($"@{nameof(Contrato.Anulado)}", true);
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();

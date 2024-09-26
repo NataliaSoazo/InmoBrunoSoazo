@@ -56,7 +56,7 @@
                         @if(ViewBag.CalculoValidado == true){
                              <div>
                                 <form asp-action="Finalizar">
-                                    <input type="hidden" name="fechaFinalizacion" value="@Model.FechaFinalizacion" />
+                                    <input type="hidden" name="FechaFinalizacion" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled />
                                     <input type="hidden" name="id" value="@Model.Id" />
                                     <div class="form-group p-5">
                                         <input type="submit" value="Finalizar contrato" class="btn btn-success

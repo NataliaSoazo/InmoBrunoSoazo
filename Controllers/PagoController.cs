@@ -174,7 +174,7 @@ public class PagoController : Controller
         {
             lista = rp.GetPagos();
             lista = lista.Where(x => x.IdContrato == id).ToList();
-                return RedirectToAction(nameof(Index));
+            return View("Index", lista);
         }
         catch (Exception ex)
         {

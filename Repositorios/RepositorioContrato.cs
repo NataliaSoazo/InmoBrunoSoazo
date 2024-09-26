@@ -20,7 +20,8 @@ public class RepositorioContrato
                       p.{nameof(Inquilino.Nombre)}, p.{nameof(Inquilino.Apellido)}, {nameof(Contrato.IdInmueble)}, m.{nameof(Inmueble.Direccion)}
                 FROM Contratos i 
                 INNER JOIN Inquilinos p ON i.{nameof(Contrato.IdInquilino)} = p.{nameof(Inquilino.Id)}
-                INNER JOIN Inmuebles m ON i.{nameof(Contrato.IdInmueble)} = m.{nameof(Inmueble.Id)}";
+                INNER JOIN Inmuebles m ON i.{nameof(Contrato.IdInmueble)} = m.{nameof(Inmueble.Id)}
+                ORDER BY i.{nameof(Contrato.Id)} ASC;";
             using (var command = new MySqlCommand(sql, connection))
             {
                 connection.Open();

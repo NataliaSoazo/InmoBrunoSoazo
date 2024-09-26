@@ -74,6 +74,7 @@
 <a asp-action="Index">Volver al listado</a>
 </div>
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/select2/select2.min.js"></script>
 <script>
     $(document).ready(function () {
@@ -81,6 +82,19 @@
     });
 </script>
 
+<script>
+    // Obtener la fecha de hoy
+    const hoy = new Date();
+    // Formatear la fecha en el formato YYYY-MM-DD
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Sumar 1 porque getMonth() devuelve un índice de 0 a 11
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    const fechaFormateada = `${anio}-${mes}-${dia}`;
+
+    // Establecer la fecha en el campo de entrada
+    document.getElementById('fechaInicio').value = fechaFormateada;
+     document.getElementById('fechaTerm').value = fechaFormateada;
+</script>
 
 @section Scripts {
     @{

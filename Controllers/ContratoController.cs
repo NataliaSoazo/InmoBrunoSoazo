@@ -9,10 +9,10 @@ namespace PROYECTO_BRUNO_SOAZO.Controllers;
 public class ContratoController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-
     public ContratoController(ILogger<HomeController> logger)
     {
         _logger = logger;
+       
     }
     [Authorize]
     public IActionResult Index()
@@ -223,7 +223,7 @@ public class ContratoController : Controller
         // Pasar el nuevo contrato a la vista
         return View("editar", nuevoContrato);
     }
-    
+     [Authorize(Policy = "Administrador")]
     public IActionResult FinalizarContrato(int id)
     {
         RepositorioContrato rc = new RepositorioContrato();
@@ -237,49 +237,61 @@ public class ContratoController : Controller
        }
     }
     [HttpPost]
-     public IActionResult Calcular(int id, DateTime FechaFinalizacion)
-    {    RepositorioContrato repoContrato = new RepositorioContrato();
-         var i= repoContrato.GetContrato(id);
-
-         var fechaValida = ValidarFecha( id, FechaFinalizacion);
-        if(!fechaValida){
-        ViewBag.Error = "Ingrese una Fecha válida";
-         return View("FinalizarContrato", i);
-        }
-       else{
+     [Authorize(Policy = "Administrador")]
+    public IActionResult Calcular(int id, DateTime FechaFinalizacion)
+    {
+        RepositorioContrato repoContrato = new RepositorioContrato();
+        var i = repoContrato.GetContrato(id);
+         var fechaValida = ValidarFecha(id, FechaFinalizacion);
         var deuda = Adeuda(i);
         var multa = CalcularMulta(i, FechaFinalizacion);
-        ViewBag.Deuda = deuda;
-        ViewBag.Multa = multa;
-         return View("FinalizarContrato", i);
-       }
+        if (!fechaValida)
+        {
+            ViewBag.Error = "Ingrese una Fecha válida";
+            return View("FinalizarContrato", i, );
+        }
+        else if (YaPagoMulta(i, multa) && deuda <= 0)
+        {   ViewBag.Mensaje="Usted ya registra la multa correspondiente paga";
+            ViewBag.CalculoValidado = true;
+            return View("FinalizarContrato", i);
+        }
+        else
+        {
+            ViewBag.Deuda = deuda;
+            ViewBag.Multa = multa;
+            return View("FinalizarContrato", i);
+        }
+
     }
+          [Authorize(Policy = "Administrador")]
+
     public Boolean ValidarFecha(int idContrato, DateTime fechaIngresada){
         RepositorioContrato repoContrato = new RepositorioContrato();
          var contrato= repoContrato.GetContrato(idContrato);
-         if(fechaIngresada >= DateTime.Now && fechaIngresada<contrato.FechaTerm){
+         if(fechaIngresada >= DateTime.Now.Date && fechaIngresada<contrato.FechaTerm){
             return true;
          }else
            return false;
     }
-
-       public IActionResult Finalizar(int id, double Multa)
+     [Authorize(Policy = "Administrador")]
+       public IActionResult Finalizar(int id, DateTime FechaFinalizacion)
     {   
-         RepositorioContrato rc = new RepositorioContrato();
+        RepositorioContrato rc = new RepositorioContrato();
         var contrato = rc.GetContrato(id);
-         var deuda = Adeuda(contrato);
-        if (YaPagoMulta(contrato, Multa) && deuda <=0){
-            rc.FinalizarContrato(contrato);
-           return RedirectToAction(nameof(Index));
+        if(contrato.FechaFinalizacion == null){
+        contrato.FechaFinalizacion = FechaFinalizacion;
+        rc.FinalizarContrato(contrato);
+        ViewBag.Mensaje= "Contrato Finalizado correctamente";
+        return RedirectToAction(nameof(Index));
         }
         else{
-              ViewBag.error = "Debes asentar la multa correspondiente para finalizar el contrato."; 
-             return View("FinalizarContrato", contrato);
+            ViewBag.Error= "El contrato ya ha sido finalizado";
+             return RedirectToAction(nameof(Index));
         }
         
     } 
     
-    private  int Adeuda(Contrato i){
+    public int Adeuda(Contrato i){
         RepositorioPago rp = new RepositorioPago();
         List<Pago> cuotas = new List<Pago>();
         var lista = rp.ObtenerPagosPorContrato(i.Id);
@@ -306,27 +318,36 @@ public class ContratoController : Controller
 
         
     }
-    public double CalcularMulta(Contrato i, DateTime fFinalizacion){
-        RepositorioContrato rp = new RepositorioContrato();
-        var contrato = rp.GetContrato(i.Id);
-        var aniosFaltantes = contrato.FechaTerm.Year-fFinalizacion.Year;
-        var mesesFaltantes = contrato.FechaTerm.Month -fFinalizacion.Month;
-        var tiempoFaltante = aniosFaltantes* 12 + mesesFaltantes;
-
-        var aniosAcordados = contrato.FechaTerm.Year-contrato.FechaInicio.Year;
-        var mesesAcordados =  contrato.FechaTerm.Month-contrato.FechaInicio.Month;
-        var tiempoAcordado = aniosAcordados*12+mesesAcordados;
-        var  multa = 0.0;
-        if(tiempoFaltante/tiempoAcordado > 0.5){
-            multa = contrato.MontoMensual*2;
-        }
-        else{
-            multa = contrato.MontoMensual;
-        }
-        return multa;
+         [Authorize(Policy = "Administrador")]
+         private  double CalcularMulta(Contrato i, DateTime fFinalizacion) {
+         RepositorioContrato rp = new RepositorioContrato();
+         var contrato = rp.GetContrato(i.Id);
+     
+         // Calculamos el tiempo acordado
+         var aniosAcordados = contrato.FechaTerm.Year - contrato.FechaInicio.Year;
+         var mesesAcordados = contrato.FechaTerm.Month - contrato.FechaInicio.Month;
+         var tiempoAcordado = aniosAcordados * 12 + mesesAcordados;
+     
+         // Calculamos el tiempo cumplido hasta la fecha de finalización
+         var aniosCumplidos = fFinalizacion.Year - contrato.FechaInicio.Year;
+         var mesesCumplidos = fFinalizacion.Month - contrato.FechaInicio.Month;
+         var tiempoCumplido = aniosCumplidos * 12 + mesesCumplidos;
+     
+         // Calculamos la multa
+         double multa;
+         var mitadTiempo = tiempoAcordado / 2;
+         
+         if (tiempoCumplido < mitadTiempo) {
+             multa = contrato.MontoMensual * 2; // Menos de la mitad, paga 2 meses
+         } else {
+             multa = contrato.MontoMensual; // Más de la mitad, paga 1 mes
+         }
+         
+         return multa;
     }
 
-    public Boolean YaPagoMulta(Contrato i, Double Multa){
+         [Authorize(Policy = "Administrador")]
+    private  Boolean YaPagoMulta(Contrato i, double multa ){
         Boolean  pago = false;
         RepositorioPago rp = new RepositorioPago();
         List<Pago> cuotas = new List<Pago>();
@@ -335,7 +356,7 @@ public class ContratoController : Controller
              foreach (var item in (List<Pago>) lista)
           
                     {
-                       if(item.Referencia =="MULTA" && item.Importe == Multa){
+                       if(item.Referencia =="MULTA" && item.Importe == multa ){
                         pago = true;
                        }
                     }

@@ -238,8 +238,7 @@ public class RepositorioContrato
         using (var connection = new MySqlConnection(ConnectionString))
         {
             string sql = $@"UPDATE contratos SET 
-                    {nameof(Contrato.FechaFinalizacion)} = @{nameof(Contrato.FechaFinalizacion)},
-                  
+                    {nameof(Contrato.FechaFinalizacion)} = @{nameof(Contrato.FechaFinalizacion)}  
                 WHERE {nameof(Contrato.Id)} = @{nameof(Contrato.Id)}";
             using (var command = new MySqlCommand(sql, connection))
             {

@@ -174,12 +174,12 @@ public class PagoController : Controller
         {
             lista = rp.GetPagos();
             lista = lista.Where(x => x.IdContrato == id).ToList();
-            return View("Index", lista);
+                return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             TempData["Error"] = "Ocurrio un error al obtener la lista de pagos";
-            return View("Index", lista);
+               return RedirectToAction(nameof(Index));
         }
     }
 
